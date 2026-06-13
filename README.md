@@ -1,16 +1,31 @@
 # Rouge
 
-An in-game **AI redstone assistant** for Minecraft, accessed entirely through
-chat. Type `/rouge` to open a session, talk to a redstone-focused AI in chat, and
-type `/rouge` again to close it.
+A **redstone learning tool** for Minecraft, built as a client-side Fabric mod.
 
-- **Client-side** Fabric mod (works in singleplayer and on any server — no
-  server-side install).
-- Your messages are intercepted while a session is open, sent to
-  [OpenRouter](https://openrouter.ai), and the reply is printed back to **your own
-  chat** as a purple `[Rouge]` line. The original message is never sent to public
-  chat.
-- Conversation memory lasts for the session and is **cleared when you close it**.
+1. **Sketch** a circuit on a freeform web canvas — loose pen strokes, drag-dropped
+   components, and a one-line note describing the goal.
+2. Rouge's **AI turns the sketch into a 3D build** and writes a **Litematica
+   overlay** you build against in-game.
+3. **Practice by difficulty** — higher levels hide more of the overlay so you fill
+   in the gaps yourself, while Rouge's **build-aware chat tutor** gives hints and
+   flags mistakes.
+
+It's also a plain in-game **AI redstone chat**: type `/rouge` to open a session,
+ask questions, `/rouge` again to close. Replies print to **your own** chat as a
+purple `[Rouge]` line (client-side; nothing goes to public chat).
+
+### Commands
+
+| Command | What it does |
+| --- | --- |
+| `/rouge` | Toggle the chat tutor (build-aware when a lesson is loaded) |
+| `/rouge load` | Load the bundled sample lesson + write its overlay |
+| `/rouge solution` | Place the full solution in the world (the answer key) |
+| `/rouge level basic\|easy\|medium\|hard` | Hide 0 / 20 / 50 / 80% of the overlay |
+| `/rouge check` | Report your progress vs. the solution |
+
+While you build, Rouge quietly points out wrong placements — computed locally, so
+it never spends API calls or rate-limits you.
 
 ## Requirements
 
@@ -76,6 +91,25 @@ Then in-game:
    reply prints in purple, visible only to you.
 4. Type `/rouge` again to close the session.
 
+## Learning mode: sketch → build → practice
+
+With the game running (Rouge starts a localhost bridge on port `25599`):
+
+1. Open `canvas/index.html` in a browser (double-click it, or
+   `python3 -m http.server` in the `canvas/` folder and visit the page).
+2. **Pen** to draw loose wires, click a **component** then click the board to drop
+   it, write a **note** ("lamp on only when both levers are on"), pick a
+   **difficulty**, and hit **Build in Minecraft →**.
+3. Rouge's vision AI compiles the sketch into a 3D circuit, writes the overlay, and
+   says so in chat. Open Litematica (**M → Load Schematics → `rouge_lesson`**) to
+   see the ghost, then build against it.
+4. Raise the difficulty with `/rouge level hard` to hide more and practice; use
+   `/rouge check` or just ask `/rouge` for help. `/rouge solution` reveals the
+   full answer.
+
+No canvas? `/rouge load` loads a bundled sample lesson so the whole loop works
+without the AI or the browser.
+
 ### Troubleshooting
 
 - **`[Rouge] OpenRouter rejected the API key` / "No auth credentials found"** —
@@ -89,24 +123,36 @@ Then in-game:
 
 ## Configuration
 
-- **Model:** the default is `openai/gpt-oss-20b:free`. Change the `model` field in
-  `src/client/java/dev/dhanika/rouge/ai/OpenRouterConfig.java` — including to a
-  paid model — with no other code changes. Free model ids change; verify current
-  ones at <https://openrouter.ai/models>.
-- **System prompt:** edit `src/main/resources/rouge/system_prompt.txt` (the
-  redstone-tutor persona). It's loaded from resources, so no code change needed.
+- **Models:** in `src/client/java/dev/dhanika/rouge/ai/OpenRouterConfig.java`,
+  `model` is the text/chat model (default `openai/gpt-oss-20b:free`) and
+  `visionModel` reads the sketch (default `nex-agi/nex-n2-pro:free`). Both are
+  one-line swaps — including to paid models. Free vision models rate-limit often;
+  if compiles fail with `429`, switch `visionModel` to another from
+  <https://openrouter.ai/models> (e.g. `google/gemma-4-31b-it:free`).
+- **Prompts:** `src/main/resources/rouge/system_prompt.txt` (chat tutor persona)
+  and `sketch_compiler.txt` (sketch→build instructions). Loaded from resources —
+  no recompile needed to edit.
+- **Sample lesson:** `src/main/resources/rouge/sample_solution.json`.
 
 ## Architecture
 
+The merge point between the canvas and the chat is one contract: **`BuildSpec`**
+(a list of `{x,y,z,block,role}`). Everything produces or consumes one.
+
 | Package | Responsibility |
 | --- | --- |
-| `ai/` | Reusable OpenRouter client (no Minecraft imports) |
-| `prompt/` | Loads the swappable system prompt |
-| `session/` | Single source of truth: open/closed state + history |
+| `ai/` | Reusable OpenRouter client — text + vision (no Minecraft imports) |
+| `prompt/` | Loads the swappable system / sketch-compiler prompts |
+| `compile/` | `SketchCompiler`: sketch JSON + PNG → `BuildSpec` via vision model |
+| `build/` | `BuildSpec`, `Difficulty`, `LitematicWriter`, `WorldPlacer`, `BuildDiff` |
+| `teach/` | `LessonManager` (active lesson state) + `ProactiveTutor` (local nudges) |
+| `bridge/` | `CanvasBridge` — localhost `HttpServer` receiving the canvas POST |
+| `session/` | Chat session state + history; injects lesson context |
 | `chat/` | Chat interception (`ALLOW_CHAT`) + local chat output |
-| `command/` | `/rouge` command registration |
-| `RougeClient` | Entry point — wires everything together |
+| `command/` | `/rouge` command + subcommands |
+| `canvas/` | The standalone freeform sketch web app (HTML/JS/CSS) |
 
-The `ai/` and `command/` packages are structured so future features (e.g. a
-`/rougebuild` command that generates schematics) plug in without touching the
-existing modules.
+`build/LitematicWriter` writes Litematica's format directly (palette + bit-packed
+long array). Producers (canvas/AI or `/rouge load`) and consumers (`.litematic`
+overlay + live placement) are decoupled through `BuildSpec`, so new sources or
+outputs plug in without touching the rest.

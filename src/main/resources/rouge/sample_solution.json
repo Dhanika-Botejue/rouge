@@ -1,0 +1,18 @@
+{
+  "sizeX": 5,
+  "sizeY": 2,
+  "sizeZ": 1,
+  "blocks": [
+    { "x": 0, "y": 0, "z": 0, "block": "minecraft:stone", "role": "support" },
+    { "x": 1, "y": 0, "z": 0, "block": "minecraft:stone", "role": "support" },
+    { "x": 2, "y": 0, "z": 0, "block": "minecraft:stone", "role": "support" },
+    { "x": 3, "y": 0, "z": 0, "block": "minecraft:stone", "role": "support" },
+    { "x": 4, "y": 0, "z": 0, "block": "minecraft:stone", "role": "support" },
+
+    { "x": 0, "y": 1, "z": 0, "block": "minecraft:lever[face=floor,facing=north]", "role": "input" },
+    { "x": 1, "y": 1, "z": 0, "block": "minecraft:redstone_wire", "role": "wire" },
+    { "x": 2, "y": 1, "z": 0, "block": "minecraft:repeater[facing=east,delay=1]", "role": "delay" },
+    { "x": 3, "y": 1, "z": 0, "block": "minecraft:redstone_wire", "role": "wire" },
+    { "x": 4, "y": 1, "z": 0, "block": "minecraft:redstone_lamp", "role": "output" }
+  ]
+}

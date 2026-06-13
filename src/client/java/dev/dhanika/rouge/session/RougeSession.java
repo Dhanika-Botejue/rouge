@@ -4,6 +4,7 @@ import dev.dhanika.rouge.ai.ChatMessage;
 import dev.dhanika.rouge.ai.OpenRouterClient;
 import dev.dhanika.rouge.chat.ChatDisplay;
 import dev.dhanika.rouge.prompt.SystemPrompts;
+import dev.dhanika.rouge.teach.LessonManager;
 import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
@@ -89,7 +90,15 @@ public final class RougeSession {
         awaitingReply = true;
         ChatDisplay.system("Rouge is thinking…");
 
-        client.complete(history).whenComplete((reply, err) ->
+        // Inject fresh lesson context (if a build is active) without storing it in
+        // history, so Rouge tutors about the current build and the diff stays live.
+        List<ChatMessage> request = new ArrayList<>(history);
+        String lessonContext = LessonManager.tutorContext();
+        if (lessonContext != null) {
+            request.add(Math.min(1, request.size()), ChatMessage.system(lessonContext));
+        }
+
+        client.complete(request).whenComplete((reply, err) ->
                 Minecraft.getInstance().execute(() -> onReply(reply, err)));
     }
 

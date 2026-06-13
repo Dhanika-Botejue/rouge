@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rouge — Sketch a Circuit</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Rouge <span class="sub">sketch a redstone circuit</span></h1>
+    <p class="hint">Draw loose wires with the Pen, drop components where you want them,
+      describe the goal, then Build. Rouge's AI turns it into a Litematica overlay in your world.</p>
+  </header>
+
+  <div class="toolbar">
+    <div class="group">
+      <span class="label">Draw</span>
+      <button class="tool active" data-tool="pen">✏️ Pen</button>
+      <button class="tool" data-tool="erase">🩹 Erase wire</button>
+    </div>
+    <div class="group">
+      <span class="label">Components</span>
+      <button class="tool" data-tool="lever">Lever</button>
+      <button class="tool" data-tool="button">Button</button>
+      <button class="tool" data-tool="lamp">Lamp</button>
+      <button class="tool" data-tool="repeater">Repeater</button>
+      <button class="tool" data-tool="torch">Torch</button>
+      <button class="tool" data-tool="dust">Dust</button>
+    </div>
+    <div class="group">
+      <button id="clear" class="danger">Clear</button>
+    </div>
+  </div>
+
+  <canvas id="board" width="780" height="480"></canvas>
+
+  <div class="controls">
+    <input id="note" type="text" placeholder="Describe it, e.g. 'lamp turns on only when both levers are on'" />
+    <select id="difficulty" title="How much of the overlay to hide for practice">
+      <option value="basic">Basic — show everything</option>
+      <option value="easy">Easy — hide 20%</option>
+      <option value="medium">Medium — hide 50%</option>
+      <option value="hard">Hard — hide 80%</option>
+    </select>
+    <button id="build">Build in Minecraft →</button>
+  </div>
+
+  <p id="status" class="status"></p>
+
+  <script src="canvas.js"></script>
+</body>
+</html>

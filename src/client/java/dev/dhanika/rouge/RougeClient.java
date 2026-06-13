@@ -2,9 +2,12 @@ package dev.dhanika.rouge;
 
 import dev.dhanika.rouge.ai.OpenRouterClient;
 import dev.dhanika.rouge.ai.OpenRouterConfig;
+import dev.dhanika.rouge.bridge.CanvasBridge;
 import dev.dhanika.rouge.chat.ChatInterceptor;
 import dev.dhanika.rouge.command.RougeCommands;
+import dev.dhanika.rouge.compile.SketchCompiler;
 import dev.dhanika.rouge.session.RougeSession;
+import dev.dhanika.rouge.teach.ProactiveTutor;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import org.slf4j.Logger;
@@ -35,9 +38,14 @@ public class RougeClient implements ClientModInitializer {
 
         RougeCommands.register();
         ChatInterceptor.register();
+        ProactiveTutor.register();
+        CanvasBridge.start(new SketchCompiler(client));
 
         // Never stay "open" across worlds/servers.
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, mc) -> RougeSession.reset());
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, mc) -> {
+            RougeSession.reset();
+            ProactiveTutor.reset();
+        });
 
         LOGGER.info("Rouge initialized (model: {}).", config.model());
     }

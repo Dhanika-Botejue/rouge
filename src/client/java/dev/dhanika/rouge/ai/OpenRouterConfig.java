@@ -16,10 +16,18 @@ public final class OpenRouterConfig {
     public static final String TOKEN_ENV_VAR = "OPENROUTER_API_KEY";
 
     /**
-     * Default model. Free models on OpenRouter come and go and are rate-limited;
-     * verify the current id at https://openrouter.ai/models and change it here.
+     * Default text model (chat/tutor). Free models on OpenRouter come and go and
+     * are rate-limited; verify the current id at https://openrouter.ai/models.
      */
     private String model = "openai/gpt-oss-20b:free";
+
+    /**
+     * Vision model used to read the sketch when compiling a build. Must accept
+     * image input. nex-n2-pro followed the block/coord constraints best in testing;
+     * swap among the free vision models (e.g. google/gemma-4-31b-it:free) if it's
+     * unavailable or rate-limited.
+     */
+    private String visionModel = "nex-agi/nex-n2-pro:free";
 
     private final String token;
 
@@ -42,6 +50,14 @@ public final class OpenRouterConfig {
 
     public void setModel(String model) {
         this.model = model;
+    }
+
+    public String visionModel() {
+        return visionModel;
+    }
+
+    public void setVisionModel(String visionModel) {
+        this.visionModel = visionModel;
     }
 
     public String endpoint() {

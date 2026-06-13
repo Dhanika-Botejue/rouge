@@ -35,27 +35,74 @@ public final class OpenRouterClient {
     }
 
     /**
-     * Sends the conversation to OpenRouter and resolves with the reply text.
-     * The returned future completes exceptionally (with a human-readable message)
-     * on missing token, non-200 status, or malformed response.
+     * Sends the conversation to OpenRouter (text model) and resolves with the reply
+     * text. The returned future completes exceptionally (with a human-readable
+     * message) on missing token, non-200 status, or malformed response.
      */
     public CompletableFuture<String> complete(List<ChatMessage> history) {
+        JsonArray messages = new JsonArray();
+        for (ChatMessage m : history) {
+            messages.add(textMessage(m.role(), m.content()));
+        }
+        return send(config.model(), messages, Duration.ofSeconds(30));
+    }
+
+    /**
+     * Sends a single multimodal turn (text + optional PNG) to the configured vision
+     * model and resolves with the reply text. Used to compile a sketch into a build.
+     *
+     * @param systemPrompt system instructions (may be null/empty)
+     * @param userText     the structured prompt text
+     * @param pngBase64    base64 PNG (no data-URL prefix); may be null to skip the image
+     */
+    public CompletableFuture<String> completeVision(String systemPrompt, String userText, String pngBase64) {
+        JsonArray messages = new JsonArray();
+        if (systemPrompt != null && !systemPrompt.isEmpty()) {
+            messages.add(textMessage("system", systemPrompt));
+        }
+
+        JsonArray content = new JsonArray();
+        JsonObject textPart = new JsonObject();
+        textPart.addProperty("type", "text");
+        textPart.addProperty("text", userText);
+        content.add(textPart);
+        if (pngBase64 != null && !pngBase64.isEmpty()) {
+            JsonObject imageUrl = new JsonObject();
+            imageUrl.addProperty("url", "data:image/png;base64," + pngBase64);
+            JsonObject imagePart = new JsonObject();
+            imagePart.addProperty("type", "image_url");
+            imagePart.add("image_url", imageUrl);
+            content.add(imagePart);
+        }
+        JsonObject userMessage = new JsonObject();
+        userMessage.addProperty("role", "user");
+        userMessage.add("content", content);
+        messages.add(userMessage);
+
+        return send(config.visionModel(), messages, Duration.ofSeconds(60));
+    }
+
+    private CompletableFuture<String> send(String model, JsonArray messages, Duration timeout) {
         if (!config.hasToken()) {
             return CompletableFuture.failedFuture(new IllegalStateException(
                     "No OpenRouter API key. Set the " + OpenRouterConfig.TOKEN_ENV_VAR + " environment variable."));
         }
 
+        JsonObject body = new JsonObject();
+        body.addProperty("model", model);
+        body.add("messages", messages);
+
         HttpRequest request;
         try {
             request = HttpRequest.newBuilder()
                     .uri(URI.create(config.endpoint()))
-                    .timeout(Duration.ofSeconds(30))
+                    .timeout(timeout)
                     .header("Authorization", "Bearer " + config.token())
                     .header("Content-Type", "application/json")
                     // Optional OpenRouter attribution headers.
                     .header("HTTP-Referer", "https://github.com/dhanika/rouge")
                     .header("X-Title", "Rouge")
-                    .POST(HttpRequest.BodyPublishers.ofString(buildBody(history)))
+                    .POST(HttpRequest.BodyPublishers.ofString(body.toString()))
                     .build();
         } catch (Exception e) {
             return CompletableFuture.failedFuture(e);
@@ -65,19 +112,11 @@ public final class OpenRouterClient {
                 .thenApply(this::parseReply);
     }
 
-    /** Builds the OpenAI-style request body: {@code { model, messages: [...] }}. */
-    private String buildBody(List<ChatMessage> history) {
-        JsonArray messages = new JsonArray();
-        for (ChatMessage m : history) {
-            JsonObject obj = new JsonObject();
-            obj.addProperty("role", m.role());
-            obj.addProperty("content", m.content());
-            messages.add(obj);
-        }
-        JsonObject body = new JsonObject();
-        body.addProperty("model", config.model());
-        body.add("messages", messages);
-        return body.toString();
+    private JsonObject textMessage(String role, String content) {
+        JsonObject obj = new JsonObject();
+        obj.addProperty("role", role);
+        obj.addProperty("content", content);
+        return obj;
     }
 
     /** Extracts {@code choices[0].message.content}, or throws a readable error. */
