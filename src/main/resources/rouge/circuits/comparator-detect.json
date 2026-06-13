@@ -2,8 +2,47 @@
   "id": "comparator-detect",
   "title": "Comparator Item Detector",
   "category": "signal",
-  "description": "A comparator reads the fullness of a chest, hopper, or furnace and outputs a signal strength proportional to fill level (0 = empty, 15 = full). Used in item sorters, auto-crafters, and storage indicators. The comparator must face away from the container.",
+  "description": "A comparator reads the fill level of a chest, hopper, or furnace and outputs a signal strength proportional to how full it is (0 = empty, 15 = full). Place the comparator directly beside the container with its back facing the container and its front facing away. Used in item sorters, storage monitors, and auto-crafters.",
   "inputs": ["container_fill"],
   "outputs": ["fill_signal"],
-  "footprint": "3x2x1"
+  "aliases": ["chest detector", "container reader", "fill sensor"],
+  "footprint": "4x2x1",
+  "steps": [
+    {
+      "title": "Stone base",
+      "explanation": "Four stone blocks in a line. The chest and comparator both sit at y=1; stone provides the surface. We need four positions: chest, comparator, output stone, and lamp.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":3,"y":0,"z":0,"block":"minecraft:stone"}
+      ]
+    },
+    {
+      "title": "Chest and comparator",
+      "explanation": "Place a chest at (0,1,0). Place the comparator at (1,1,0) facing east — its back reads the chest to the west, its front outputs east. The comparator outputs a signal from 0 to 15 based on how many items are in the chest. Put some items in the chest now to verify signal is non-zero.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":3,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:chest[facing=south,type=single,waterlogged=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:comparator[facing=east,mode=compare,powered=false]"}
+      ]
+    },
+    {
+      "title": "Output dust and lamp",
+      "explanation": "Dust at (2,1,0) carries the comparator's output signal east. A redstone lamp at (3,1,0) lights up proportionally — fully lit at signal 15 (full chest), dark at signal 0 (empty). Use the dust connection point at (2,1,0) to wire this sensor into any larger circuit.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":3,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:chest[facing=south,type=single,waterlogged=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:comparator[facing=east,mode=compare,powered=false]"},
+        {"x":2,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":1,"z":0,"block":"minecraft:redstone_lamp"}
+      ]
+    }
+  ]
 }

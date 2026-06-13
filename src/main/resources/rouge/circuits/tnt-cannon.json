@@ -2,7 +2,66 @@
   "id": "tnt-cannon",
   "title": "TNT Cannon",
   "category": "tnt",
-  "description": "Launches primed TNT across long distances using water to absorb the blast. Build a trough lined with a solid material, place a water source at the closed (back) end so the floor TNT won't destroy the cannon, then lay several 'charge' TNT along the trough floor and one 'projectile' TNT on top at the front. Firing order is everything: the charges detonate a tick or two before the projectile so their blast knocks the projectile forward instead of straight up. A repeater chain (each repeater set to a small delay) wired from a single button creates that staggered ignition. More charge TNT = more range. Point the open front of the trough at your target.",
+  "description": "Launches a TNT projectile using the blast force of charge TNTs. A water source at the back of the trough absorbs the explosion so the cannon body survives. Redstone wiring on top fires charges and projectile in sequence — charges detonate first to build up momentum, then the projectile detonates while already airborne. More charge TNTs or higher repeater delays increase range.",
   "aliases": ["tnt cannon", "cannon", "tnt launcher"],
-  "footprint": "8x2x2"
+  "footprint": "7x3x3",
+  "steps": [
+    {
+      "title": "Trough walls and floor",
+      "explanation": "Build the U-shaped trough from obsidian (blast-resistant). South wall: obsidian at z=0, x=0–6, y=0 and y=1. North wall: same at z=2. Back wall: x=0, z=0–2, y=0 and y=1. Floor along z=1: obsidian x=0–6, y=0. Leave x=6 open — that is the cannon mouth.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":1,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":2,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":3,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":4,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":5,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":6,"y":0,"z":0,"block":"minecraft:obsidian"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:obsidian"},{"x":1,"y":1,"z":0,"block":"minecraft:obsidian"},{"x":2,"y":1,"z":0,"block":"minecraft:obsidian"},{"x":3,"y":1,"z":0,"block":"minecraft:obsidian"},{"x":4,"y":1,"z":0,"block":"minecraft:obsidian"},{"x":5,"y":1,"z":0,"block":"minecraft:obsidian"},{"x":6,"y":1,"z":0,"block":"minecraft:obsidian"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:obsidian"},{"x":1,"y":0,"z":2,"block":"minecraft:obsidian"},{"x":2,"y":0,"z":2,"block":"minecraft:obsidian"},{"x":3,"y":0,"z":2,"block":"minecraft:obsidian"},{"x":4,"y":0,"z":2,"block":"minecraft:obsidian"},{"x":5,"y":0,"z":2,"block":"minecraft:obsidian"},{"x":6,"y":0,"z":2,"block":"minecraft:obsidian"},
+        {"x":0,"y":1,"z":2,"block":"minecraft:obsidian"},{"x":1,"y":1,"z":2,"block":"minecraft:obsidian"},{"x":2,"y":1,"z":2,"block":"minecraft:obsidian"},{"x":3,"y":1,"z":2,"block":"minecraft:obsidian"},{"x":4,"y":1,"z":2,"block":"minecraft:obsidian"},{"x":5,"y":1,"z":2,"block":"minecraft:obsidian"},{"x":6,"y":1,"z":2,"block":"minecraft:obsidian"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:obsidian"},
+        {"x":0,"y":1,"z":1,"block":"minecraft:obsidian"},
+        {"x":1,"y":0,"z":1,"block":"minecraft:obsidian"},{"x":2,"y":0,"z":1,"block":"minecraft:obsidian"},{"x":3,"y":0,"z":1,"block":"minecraft:obsidian"},{"x":4,"y":0,"z":1,"block":"minecraft:obsidian"},{"x":5,"y":0,"z":1,"block":"minecraft:obsidian"},{"x":6,"y":0,"z":1,"block":"minecraft:obsidian"}
+      ]
+    },
+    {
+      "title": "Water source and TNT charges",
+      "explanation": "Place a water source block at (1,1,1) — it flows east and cushions the cannon from blast damage. Stack three charge TNTs at (2,1,1), (3,1,1), (4,1,1). Place one projectile TNT at (5,1,1) near the mouth. Do not ignite yet.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":1,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":2,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":3,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":4,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":5,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":6,"y":0,"z":0,"block":"minecraft:obsidian"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:obsidian"},{"x":1,"y":1,"z":0,"block":"minecraft:obsidian"},{"x":2,"y":1,"z":0,"block":"minecraft:obsidian"},{"x":3,"y":1,"z":0,"block":"minecraft:obsidian"},{"x":4,"y":1,"z":0,"block":"minecraft:obsidian"},{"x":5,"y":1,"z":0,"block":"minecraft:obsidian"},{"x":6,"y":1,"z":0,"block":"minecraft:obsidian"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:obsidian"},{"x":1,"y":0,"z":2,"block":"minecraft:obsidian"},{"x":2,"y":0,"z":2,"block":"minecraft:obsidian"},{"x":3,"y":0,"z":2,"block":"minecraft:obsidian"},{"x":4,"y":0,"z":2,"block":"minecraft:obsidian"},{"x":5,"y":0,"z":2,"block":"minecraft:obsidian"},{"x":6,"y":0,"z":2,"block":"minecraft:obsidian"},
+        {"x":0,"y":1,"z":2,"block":"minecraft:obsidian"},{"x":1,"y":1,"z":2,"block":"minecraft:obsidian"},{"x":2,"y":1,"z":2,"block":"minecraft:obsidian"},{"x":3,"y":1,"z":2,"block":"minecraft:obsidian"},{"x":4,"y":1,"z":2,"block":"minecraft:obsidian"},{"x":5,"y":1,"z":2,"block":"minecraft:obsidian"},{"x":6,"y":1,"z":2,"block":"minecraft:obsidian"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:obsidian"},{"x":0,"y":1,"z":1,"block":"minecraft:obsidian"},
+        {"x":1,"y":0,"z":1,"block":"minecraft:obsidian"},{"x":2,"y":0,"z":1,"block":"minecraft:obsidian"},{"x":3,"y":0,"z":1,"block":"minecraft:obsidian"},{"x":4,"y":0,"z":1,"block":"minecraft:obsidian"},{"x":5,"y":0,"z":1,"block":"minecraft:obsidian"},{"x":6,"y":0,"z":1,"block":"minecraft:obsidian"},
+        {"x":1,"y":1,"z":1,"block":"minecraft:water[level=0]"},
+        {"x":2,"y":1,"z":1,"block":"minecraft:tnt"},
+        {"x":3,"y":1,"z":1,"block":"minecraft:tnt"},
+        {"x":4,"y":1,"z":1,"block":"minecraft:tnt"},
+        {"x":5,"y":1,"z":1,"block":"minecraft:tnt"}
+      ]
+    },
+    {
+      "title": "Trigger wiring",
+      "explanation": "Run redstone dust along the south wall top (y=2): place dust at (1,2,0) through (5,2,0). At each charge position (x=2,3,4), add a cross-piece of dust at (x,2,1) on top of the charge TNT — this ignites the charge. For the projectile at x=5, insert a repeater at (4,2,0) facing east with delay=2 so the projectile fires ~2 ticks after the charges. Add a lever or button at (0,2,1) on the back wall to trigger the whole sequence. Point the open mouth toward your target before firing.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":1,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":2,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":3,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":4,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":5,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":6,"y":0,"z":0,"block":"minecraft:obsidian"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:obsidian"},{"x":1,"y":1,"z":0,"block":"minecraft:obsidian"},{"x":2,"y":1,"z":0,"block":"minecraft:obsidian"},{"x":3,"y":1,"z":0,"block":"minecraft:obsidian"},{"x":4,"y":1,"z":0,"block":"minecraft:obsidian"},{"x":5,"y":1,"z":0,"block":"minecraft:obsidian"},{"x":6,"y":1,"z":0,"block":"minecraft:obsidian"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:obsidian"},{"x":1,"y":0,"z":2,"block":"minecraft:obsidian"},{"x":2,"y":0,"z":2,"block":"minecraft:obsidian"},{"x":3,"y":0,"z":2,"block":"minecraft:obsidian"},{"x":4,"y":0,"z":2,"block":"minecraft:obsidian"},{"x":5,"y":0,"z":2,"block":"minecraft:obsidian"},{"x":6,"y":0,"z":2,"block":"minecraft:obsidian"},
+        {"x":0,"y":1,"z":2,"block":"minecraft:obsidian"},{"x":1,"y":1,"z":2,"block":"minecraft:obsidian"},{"x":2,"y":1,"z":2,"block":"minecraft:obsidian"},{"x":3,"y":1,"z":2,"block":"minecraft:obsidian"},{"x":4,"y":1,"z":2,"block":"minecraft:obsidian"},{"x":5,"y":1,"z":2,"block":"minecraft:obsidian"},{"x":6,"y":1,"z":2,"block":"minecraft:obsidian"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:obsidian"},{"x":0,"y":1,"z":1,"block":"minecraft:obsidian"},
+        {"x":1,"y":0,"z":1,"block":"minecraft:obsidian"},{"x":2,"y":0,"z":1,"block":"minecraft:obsidian"},{"x":3,"y":0,"z":1,"block":"minecraft:obsidian"},{"x":4,"y":0,"z":1,"block":"minecraft:obsidian"},{"x":5,"y":0,"z":1,"block":"minecraft:obsidian"},{"x":6,"y":0,"z":1,"block":"minecraft:obsidian"},
+        {"x":1,"y":1,"z":1,"block":"minecraft:water[level=0]"},
+        {"x":2,"y":1,"z":1,"block":"minecraft:tnt"},
+        {"x":3,"y":1,"z":1,"block":"minecraft:tnt"},
+        {"x":4,"y":1,"z":1,"block":"minecraft:tnt"},
+        {"x":5,"y":1,"z":1,"block":"minecraft:tnt"},
+        {"x":0,"y":2,"z":1,"block":"minecraft:lever[face=floor,facing=east,powered=false]"},
+        {"x":0,"y":2,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":1,"y":2,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":2,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":2,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":4,"y":2,"z":0,"block":"minecraft:repeater[delay=2,facing=east,locked=false,powered=false]"},
+        {"x":5,"y":2,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":2,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":2,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":5,"y":2,"z":1,"block":"minecraft:redstone_wire"}
+      ]
+    }
+  ]
 }

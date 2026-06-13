@@ -4,5 +4,54 @@
   "category": "utility",
   "description": "Generates infinite cobblestone by combining flowing lava and water. Lava flows from a source into a channel where water meets it — the collision produces cobblestone at the meeting point. A piston breaks the cobblestone block and a hopper below collects it, or the player manually mines it. Place lava source on one end of a 1-block trench, water source on the other end 4 blocks away. The cobblestone spawns 1 block from the lava. Optional: observer+piston makes it automatic; a clock-piston breaks blocks repeatedly.",
   "aliases": ["cobble gen", "cobblestone gen", "infinite cobblestone", "stone generator"],
-  "footprint": "6x3x2"
+  "footprint": "6x3x2",
+  "steps": [
+    {
+      "title": "Channel and containment walls",
+      "explanation": "Build a 6-block channel along z=0. Floor at y=0, x=0–5 (obsidian to survive lava). Side walls at z=−1 and z=1, y=0–1 to contain the fluids. Cap both ends with stone at x=−1 and x=6 so sources don't overflow. Leave x=0–5 at y=1 open — fluids and cobblestone appear here.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":1,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":2,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":3,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":4,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":5,"y":0,"z":0,"block":"minecraft:obsidian"},
+        {"x":0,"y":0,"z":-1,"block":"minecraft:stone"},{"x":1,"y":0,"z":-1,"block":"minecraft:stone"},{"x":2,"y":0,"z":-1,"block":"minecraft:stone"},{"x":3,"y":0,"z":-1,"block":"minecraft:stone"},{"x":4,"y":0,"z":-1,"block":"minecraft:stone"},{"x":5,"y":0,"z":-1,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":-1,"block":"minecraft:stone"},{"x":1,"y":1,"z":-1,"block":"minecraft:stone"},{"x":2,"y":1,"z":-1,"block":"minecraft:stone"},{"x":3,"y":1,"z":-1,"block":"minecraft:stone"},{"x":4,"y":1,"z":-1,"block":"minecraft:stone"},{"x":5,"y":1,"z":-1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":1,"y":0,"z":1,"block":"minecraft:stone"},{"x":2,"y":0,"z":1,"block":"minecraft:stone"},{"x":3,"y":0,"z":1,"block":"minecraft:stone"},{"x":4,"y":0,"z":1,"block":"minecraft:stone"},{"x":5,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":1,"block":"minecraft:stone"},{"x":1,"y":1,"z":1,"block":"minecraft:stone"},{"x":2,"y":1,"z":1,"block":"minecraft:stone"},{"x":3,"y":1,"z":1,"block":"minecraft:stone"},{"x":4,"y":1,"z":1,"block":"minecraft:stone"},{"x":5,"y":1,"z":1,"block":"minecraft:stone"},
+        {"x":-1,"y":0,"z":0,"block":"minecraft:stone"},{"x":-1,"y":1,"z":0,"block":"minecraft:stone"},
+        {"x":6,"y":0,"z":0,"block":"minecraft:stone"},{"x":6,"y":1,"z":0,"block":"minecraft:stone"}
+      ]
+    },
+    {
+      "title": "Lava and water sources",
+      "explanation": "Place a lava source block at (0,1,0) — the closed west end. Place a water source block at (5,1,0) — the open east end. Lava flows east; water flows west. They meet at (4,1,0) and instantly form cobblestone there. The cobblestone stops the lava from advancing further, protecting the water source. Mine the cobblestone at (4,1,0) to get it; a new one forms immediately.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":1,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":2,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":3,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":4,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":5,"y":0,"z":0,"block":"minecraft:obsidian"},
+        {"x":0,"y":0,"z":-1,"block":"minecraft:stone"},{"x":1,"y":0,"z":-1,"block":"minecraft:stone"},{"x":2,"y":0,"z":-1,"block":"minecraft:stone"},{"x":3,"y":0,"z":-1,"block":"minecraft:stone"},{"x":4,"y":0,"z":-1,"block":"minecraft:stone"},{"x":5,"y":0,"z":-1,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":-1,"block":"minecraft:stone"},{"x":1,"y":1,"z":-1,"block":"minecraft:stone"},{"x":2,"y":1,"z":-1,"block":"minecraft:stone"},{"x":3,"y":1,"z":-1,"block":"minecraft:stone"},{"x":4,"y":1,"z":-1,"block":"minecraft:stone"},{"x":5,"y":1,"z":-1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":1,"y":0,"z":1,"block":"minecraft:stone"},{"x":2,"y":0,"z":1,"block":"minecraft:stone"},{"x":3,"y":0,"z":1,"block":"minecraft:stone"},{"x":4,"y":0,"z":1,"block":"minecraft:stone"},{"x":5,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":1,"block":"minecraft:stone"},{"x":1,"y":1,"z":1,"block":"minecraft:stone"},{"x":2,"y":1,"z":1,"block":"minecraft:stone"},{"x":3,"y":1,"z":1,"block":"minecraft:stone"},{"x":4,"y":1,"z":1,"block":"minecraft:stone"},{"x":5,"y":1,"z":1,"block":"minecraft:stone"},
+        {"x":-1,"y":0,"z":0,"block":"minecraft:stone"},{"x":-1,"y":1,"z":0,"block":"minecraft:stone"},
+        {"x":6,"y":0,"z":0,"block":"minecraft:stone"},{"x":6,"y":1,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:lava[level=0]"},
+        {"x":5,"y":1,"z":0,"block":"minecraft:water[level=0]"}
+      ]
+    },
+    {
+      "title": "Observer and piston auto-breaker",
+      "explanation": "To automate collection, place a piston at (4,2,0) facing down — it will punch the cobblestone that forms at (4,1,0). Place an observer at (3,2,0) facing east (its face watches the channel at (4,1,0)); when cobblestone appears, the observer emits a pulse that extends the piston, breaking it. Add a hopper at (4,0,0) below the channel (under the obsidian) to catch the dropped cobblestone, pointing into a chest at (3,0,0). This makes the generator fully automatic.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":1,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":2,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":3,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":4,"y":0,"z":0,"block":"minecraft:obsidian"},{"x":5,"y":0,"z":0,"block":"minecraft:obsidian"},
+        {"x":0,"y":0,"z":-1,"block":"minecraft:stone"},{"x":1,"y":0,"z":-1,"block":"minecraft:stone"},{"x":2,"y":0,"z":-1,"block":"minecraft:stone"},{"x":3,"y":0,"z":-1,"block":"minecraft:stone"},{"x":4,"y":0,"z":-1,"block":"minecraft:stone"},{"x":5,"y":0,"z":-1,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":-1,"block":"minecraft:stone"},{"x":1,"y":1,"z":-1,"block":"minecraft:stone"},{"x":2,"y":1,"z":-1,"block":"minecraft:stone"},{"x":3,"y":1,"z":-1,"block":"minecraft:stone"},{"x":4,"y":1,"z":-1,"block":"minecraft:stone"},{"x":5,"y":1,"z":-1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":1,"y":0,"z":1,"block":"minecraft:stone"},{"x":2,"y":0,"z":1,"block":"minecraft:stone"},{"x":3,"y":0,"z":1,"block":"minecraft:stone"},{"x":4,"y":0,"z":1,"block":"minecraft:stone"},{"x":5,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":1,"block":"minecraft:stone"},{"x":1,"y":1,"z":1,"block":"minecraft:stone"},{"x":2,"y":1,"z":1,"block":"minecraft:stone"},{"x":3,"y":1,"z":1,"block":"minecraft:stone"},{"x":4,"y":1,"z":1,"block":"minecraft:stone"},{"x":5,"y":1,"z":1,"block":"minecraft:stone"},
+        {"x":-1,"y":0,"z":0,"block":"minecraft:stone"},{"x":-1,"y":1,"z":0,"block":"minecraft:stone"},
+        {"x":6,"y":0,"z":0,"block":"minecraft:stone"},{"x":6,"y":1,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:lava[level=0]"},
+        {"x":5,"y":1,"z":0,"block":"minecraft:water[level=0]"},
+        {"x":4,"y":2,"z":0,"block":"minecraft:piston[extended=false,facing=down]"},
+        {"x":3,"y":2,"z":0,"block":"minecraft:observer[facing=east,powered=false]"},
+        {"x":4,"y":-1,"z":0,"block":"minecraft:hopper[enabled=true,facing=west]"},
+        {"x":3,"y":-1,"z":0,"block":"minecraft:chest[facing=south,type=single,waterlogged=false]"}
+      ]
+    }
+  ]
 }

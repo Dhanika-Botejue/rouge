@@ -4,5 +4,34 @@
   "category": "storage",
   "description": "Automatically routes a chosen item into its own chest. The classic single-item sorter: an input hopper feeds a horizontal 'sorter' hopper that points into a chest; the sorter hopper is filled with 18 of a 'filter' item (one stack of 4 + one of the target item across the first slots, the standard 41-4-1 trick is overkill — the simple version uses 4 filler items + the target). A comparator reads the sorter hopper and, via a redstone line into the hopper underneath, keeps non-matching items flowing past while matching items drop into the chest. Chain multiple sorter modules side by side, one per item type, along a shared hopper line. Requires comparators, redstone dust, and one filler item per slot.",
   "aliases": ["item sorter", "auto sorter", "storage sorter", "hopper sorter"],
-  "footprint": "5x3x2"
+  "footprint": "5x3x2",
+  "steps": [
+    {
+      "title": "Stone base and input hopper line",
+      "explanation": "Stone floor at y=0, x=0–4, z=0–1. Place a hopper at (0,1,0) facing east — items flow east. Add a second hopper at (1,1,0) facing east (the filter hopper). Add a third hopper at (2,1,0) facing east (overflow continues). The filter hopper at (1,1,0) is where you put 4 filler items + 1 target item to lock up 5 slots.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},{"x":1,"y":0,"z":0,"block":"minecraft:stone"},{"x":2,"y":0,"z":0,"block":"minecraft:stone"},{"x":3,"y":0,"z":0,"block":"minecraft:stone"},{"x":4,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":1,"y":0,"z":1,"block":"minecraft:stone"},{"x":2,"y":0,"z":1,"block":"minecraft:stone"},{"x":3,"y":0,"z":1,"block":"minecraft:stone"},{"x":4,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:hopper[enabled=true,facing=east]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:hopper[enabled=true,facing=east]"},
+        {"x":2,"y":1,"z":0,"block":"minecraft:hopper[enabled=true,facing=east]"}
+      ]
+    },
+    {
+      "title": "Output chest and comparator signal lock",
+      "explanation": "Place a chest at (1,1,1) — items matched by the filter hopper drop into this chest. Place a comparator at (1,2,0) facing south (reads the filter hopper at (1,1,0), outputs south toward z=1). Place a redstone torch at (1,0,1) on the side of the stone to always-power the filter hopper (keeping it locked). The comparator output at (1,2,1) controls whether the hopper is disabled — when the filter item is present, comparator output is low, hopper stays enabled. Chain more modules at x=3, x=5, etc. for additional item types.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},{"x":1,"y":0,"z":0,"block":"minecraft:stone"},{"x":2,"y":0,"z":0,"block":"minecraft:stone"},{"x":3,"y":0,"z":0,"block":"minecraft:stone"},{"x":4,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":1,"y":0,"z":1,"block":"minecraft:stone"},{"x":2,"y":0,"z":1,"block":"minecraft:stone"},{"x":3,"y":0,"z":1,"block":"minecraft:stone"},{"x":4,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:hopper[enabled=true,facing=east]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:hopper[enabled=true,facing=east]"},
+        {"x":2,"y":1,"z":0,"block":"minecraft:hopper[enabled=true,facing=east]"},
+        {"x":1,"y":1,"z":1,"block":"minecraft:chest[facing=south,type=single,waterlogged=false]"},
+        {"x":1,"y":2,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":2,"z":1,"block":"minecraft:comparator[facing=south,mode=compare,powered=false]"},
+        {"x":1,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":0,"y":1,"z":1,"block":"minecraft:redstone_torch[lit=true]"}
+      ]
+    }
+  ]
 }

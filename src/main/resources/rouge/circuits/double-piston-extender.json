@@ -2,7 +2,59 @@
   "id": "double-piston-extender",
   "title": "Double Piston Extender",
   "category": "transport",
-  "description": "Pushes a single block two spaces out instead of one. A sticky piston faces the push direction; a second sticky piston sits behind it. When powered, the rear piston pushes the front piston forward, then the front piston extends — moving the head block two blocks total. Timing matters: the front piston must fire before the rear retracts. Built with a short repeater delay (2 ticks) on the rear piston's power line so the sequence is ordered correctly. Footprint is a 4-long line of blocks plus the redstone control line.",
+  "description": "Moves a block two spaces using two sticky pistons in sequence. The rear piston fires immediately on input; the front piston fires 2 ticks later via a repeater. This ordering pushes the front piston one block forward first, then the rear piston catches up and pushes both the front piston and target another block. Result: the target block moves two spaces total. Reverse by cutting the input signal.",
+  "inputs": ["extend"],
+  "outputs": [],
   "aliases": ["2 block piston", "piston extender", "double extender", "long piston"],
-  "footprint": "5x2x1"
+  "footprint": "4x2x2",
+  "steps": [
+    {
+      "title": "Stone base",
+      "explanation": "Seven stone blocks: four along the main axis (x=0–3, z=0) for the pistons and target block to sit on, and three along the control side (x=−1,0,1 at z=1) for the lever, signal path, and repeater.",
+      "blocks": [
+        {"x":-1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":-1,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":1,"block":"minecraft:stone"}
+      ]
+    },
+    {
+      "title": "Rear and front sticky pistons",
+      "explanation": "Rear sticky piston at (−1,1,0) facing east; front sticky piston at (0,1,0) facing east. Both face the push direction. When extended, the rear pushes the front piston forward; the front then extends further to push the target. Place a yellow wool block at (1,1,0) as the target you want to move.",
+      "blocks": [
+        {"x":-1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":-1,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":-1,"y":1,"z":0,"block":"minecraft:sticky_piston[extended=false,facing=east]"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:sticky_piston[extended=false,facing=east]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:yellow_wool"}
+      ]
+    },
+    {
+      "title": "Timed trigger wiring",
+      "explanation": "Lever at (−1,1,1): directly adjacent to the rear piston so it fires immediately. The lever also feeds a repeater at (0,1,1) facing east with delay=2 — this delayed signal reaches dust at (1,1,1), which powers the front piston two ticks later. Flip the lever: rear fires first, front follows. Flip back: both retract and pull the target home.",
+      "blocks": [
+        {"x":-1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":-1,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":-1,"y":1,"z":0,"block":"minecraft:sticky_piston[extended=false,facing=east]"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:sticky_piston[extended=false,facing=east]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:yellow_wool"},
+        {"x":-1,"y":1,"z":1,"block":"minecraft:lever[face=floor,facing=south,powered=false]"},
+        {"x":0,"y":1,"z":1,"block":"minecraft:repeater[delay=2,facing=east,locked=false,powered=false]"},
+        {"x":1,"y":1,"z":1,"block":"minecraft:redstone_wire"}
+      ]
+    }
+  ]
 }

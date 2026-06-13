@@ -4,5 +4,37 @@
   "category": "utility",
   "description": "Duplicates sand (or gravel, concrete powder) using a TNT-based or falling block glitch. The classic design places sand on a trapdoor above a TNT block — a piston pushes a block next to the sand, creating a falling sand entity, while simultaneously a TNT explosion absorbs the falling entity and spawns a duplicate when the sand lands. Requires careful timing via repeaters. Note: this is a technical exploit, not intended gameplay. May be patched in future versions. Each activation yields 1 extra sand block.",
   "aliases": ["sand duplicator", "dupe", "sand dupe", "gravel dupe", "falling block dupe"],
-  "footprint": "4x4x3"
+  "footprint": "4x4x3",
+  "steps": [
+    {
+      "title": "Stone base and TNT platform",
+      "explanation": "Stone base at y=0, x=0–3, z=0–2. Place TNT at (1,1,1) — the explosive that duplicates the falling block entity. Place an iron trapdoor at (1,2,1) in the open (horizontal) position — the sand will sit on it. Place sand at (1,3,1) resting on the closed trapdoor.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},{"x":1,"y":0,"z":0,"block":"minecraft:stone"},{"x":2,"y":0,"z":0,"block":"minecraft:stone"},{"x":3,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":1,"y":0,"z":1,"block":"minecraft:stone"},{"x":2,"y":0,"z":1,"block":"minecraft:stone"},{"x":3,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},{"x":1,"y":0,"z":2,"block":"minecraft:stone"},{"x":2,"y":0,"z":2,"block":"minecraft:stone"},{"x":3,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":1,"y":1,"z":1,"block":"minecraft:tnt"},
+        {"x":1,"y":2,"z":1,"block":"minecraft:iron_trapdoor[facing=north,half=bottom,open=false,powered=false,waterlogged=false]"},
+        {"x":1,"y":3,"z":1,"block":"minecraft:sand"}
+      ]
+    },
+    {
+      "title": "Piston and trigger wiring",
+      "explanation": "Place a sticky piston at (0,3,1) facing east — when extended it pushes the sand east, converting it to a falling-sand entity at (1,3,1). Place a redstone torch at (0,2,1) on the stone to provide signal. Route dust from a button at (3,1,0) through a repeater at (2,1,0) facing west (delay=1) and a repeater at (1,1,0) facing west (delay=2). First repeater ignites TNT at (1,1,1) via dust; second repeater fires the piston 1 tick later so the sand falls into the explosion zone. Each button press yields one duplicate sand.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},{"x":1,"y":0,"z":0,"block":"minecraft:stone"},{"x":2,"y":0,"z":0,"block":"minecraft:stone"},{"x":3,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":1,"y":0,"z":1,"block":"minecraft:stone"},{"x":2,"y":0,"z":1,"block":"minecraft:stone"},{"x":3,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},{"x":1,"y":0,"z":2,"block":"minecraft:stone"},{"x":2,"y":0,"z":2,"block":"minecraft:stone"},{"x":3,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":1,"y":1,"z":1,"block":"minecraft:tnt"},
+        {"x":1,"y":2,"z":1,"block":"minecraft:iron_trapdoor[facing=north,half=bottom,open=false,powered=false,waterlogged=false]"},
+        {"x":1,"y":3,"z":1,"block":"minecraft:sand"},
+        {"x":0,"y":3,"z":1,"block":"minecraft:sticky_piston[extended=false,facing=east]"},
+        {"x":3,"y":1,"z":0,"block":"minecraft:stone_button[face=floor,facing=north,powered=false]"},
+        {"x":3,"y":1,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":1,"z":1,"block":"minecraft:repeater[delay=1,facing=west,locked=false,powered=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:repeater[delay=2,facing=west,locked=false,powered=false]"},
+        {"x":0,"y":1,"z":1,"block":"minecraft:redstone_wire"}
+      ]
+    }
+  ]
 }

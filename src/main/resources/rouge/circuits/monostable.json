@@ -2,8 +2,69 @@
   "id": "monostable",
   "title": "Monostable Circuit (Pulse Shortener)",
   "category": "timing",
-  "description": "Converts any input (held lever, long pulse) into a single short pulse. Uses a torch + repeater combination: the repeater delays the signal reaching the torch's suppressor input, so the torch fires briefly before turning off. Output pulse length = repeater delay (1–4 ticks).",
+  "description": "Converts a long held signal into a brief pulse. The input passes through a repeater before reaching a torch's suppressor block — the torch fires immediately when the input arrives but the repeater delays the turn-off signal, so the output is ON for only (input_duration − repeater_delay) ticks. If the input is shorter than the repeater delay, no pulse is emitted at all. Set the repeater to delay 1–4 to control minimum pulse length.",
   "inputs": ["input"],
   "outputs": ["pulse"],
-  "footprint": "4x2x1"
+  "aliases": ["pulse limiter", "pulse shortener", "one shot"],
+  "footprint": "7x2x1",
+  "steps": [
+    {
+      "title": "Stone base",
+      "explanation": "Five stone blocks in a line. The signal travels left to right: input lever → dust → repeater → dust → torch base.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":3,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":4,"y":0,"z":0,"block":"minecraft:stone"}
+      ]
+    },
+    {
+      "title": "Input lever and dust",
+      "explanation": "Lever at (0,1,0) is the signal source. Dust at (1,1,0) and (2,1,0) carries the signal east to the repeater's input.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":3,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":4,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:lever[face=floor,facing=south,powered=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":1,"z":0,"block":"minecraft:redstone_wire"}
+      ]
+    },
+    {
+      "title": "Repeater",
+      "explanation": "Place the repeater at (3,1,0) facing east with delay set to 2 ticks. The repeater slows the signal before it reaches the torch's base. Right-click to change the delay — 1 tick gives the shortest pulses, 4 ticks the longest.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":3,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":4,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:lever[face=floor,facing=south,powered=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":1,"z":0,"block":"minecraft:repeater[delay=2,facing=east,locked=false,powered=false]"}
+      ]
+    },
+    {
+      "title": "Torch and output lamp",
+      "explanation": "Dust at (4,1,0) carries the delayed signal onto stone (4,0,0). A wall torch at (5,0,0) facing east is attached to that stone — it is ON normally and goes OFF only while stone (4,0,0) is powered. The lamp at (6,0,0) shows the torch output. Flip the lever ON then OFF quickly: the lamp will pulse briefly based on your repeater delay.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":3,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":4,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:lever[face=floor,facing=south,powered=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":1,"z":0,"block":"minecraft:repeater[delay=2,facing=east,locked=false,powered=false]"},
+        {"x":4,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":5,"y":0,"z":0,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"},
+        {"x":6,"y":0,"z":0,"block":"minecraft:redstone_lamp"}
+      ]
+    }
+  ]
 }

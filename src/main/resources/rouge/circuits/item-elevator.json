@@ -2,7 +2,61 @@
   "id": "item-elevator",
   "title": "Bubble Column Item Elevator",
   "category": "transport",
-  "description": "Carries dropped items straight up using a soul-sand bubble column. Build a vertical 1x1 shaft of any solid block, place a soul sand block at the bottom, and fill every shaft block with water source (in 1.20 each level becomes a source inside the column). Soul sand creates upward bubbles that drag items and the player upward; magma block would pull them down instead. Feed items in at the bottom with a hopper or dropper, and catch them at the top with a hopper into a chest. Cap the top with a solid block and a sign or trapdoor to hold the water in. Fast, cheap, and silent — the standard way to move items between floors.",
+  "description": "Carries dropped items straight up using a soul-sand bubble column inside a 1×1 water shaft. Soul sand at the bottom creates upward-flowing bubbles that drag items (and players) to the top. A hopper at the base feeds items in; a hopper at the top catches them. Fast, cheap, and silent — the standard vertical item mover between floors.",
+  "inputs": ["items_in"],
+  "outputs": ["items_out"],
   "aliases": ["item elevator", "water elevator", "bubble elevator", "item lift"],
-  "footprint": "1x6x1"
+  "footprint": "1x6x1",
+  "steps": [
+    {
+      "title": "Soul sand base and shaft walls",
+      "explanation": "Place soul sand at (0,0,0) — this generates the upward bubble column. Build stone walls on all four sides (±X and ±Z) rising from y=0 to y=5 to form the 1×1 shaft. The shaft must be fully enclosed so water does not leak.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:soul_sand"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},{"x":-1,"y":0,"z":0,"block":"minecraft:stone"},{"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":0,"y":0,"z":-1,"block":"minecraft:stone"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:stone"},{"x":-1,"y":1,"z":0,"block":"minecraft:stone"},{"x":0,"y":1,"z":1,"block":"minecraft:stone"},{"x":0,"y":1,"z":-1,"block":"minecraft:stone"},
+        {"x":1,"y":2,"z":0,"block":"minecraft:stone"},{"x":-1,"y":2,"z":0,"block":"minecraft:stone"},{"x":0,"y":2,"z":1,"block":"minecraft:stone"},{"x":0,"y":2,"z":-1,"block":"minecraft:stone"},
+        {"x":1,"y":3,"z":0,"block":"minecraft:stone"},{"x":-1,"y":3,"z":0,"block":"minecraft:stone"},{"x":0,"y":3,"z":1,"block":"minecraft:stone"},{"x":0,"y":3,"z":-1,"block":"minecraft:stone"},
+        {"x":1,"y":4,"z":0,"block":"minecraft:stone"},{"x":-1,"y":4,"z":0,"block":"minecraft:stone"},{"x":0,"y":4,"z":1,"block":"minecraft:stone"},{"x":0,"y":4,"z":-1,"block":"minecraft:stone"},
+        {"x":1,"y":5,"z":0,"block":"minecraft:stone"},{"x":-1,"y":5,"z":0,"block":"minecraft:stone"},{"x":0,"y":5,"z":1,"block":"minecraft:stone"},{"x":0,"y":5,"z":-1,"block":"minecraft:stone"}
+      ]
+    },
+    {
+      "title": "Fill shaft with water sources",
+      "explanation": "Place a water source block at every level of the shaft from y=1 to y=4. Each block must be a source (use a bucket at each level, not flow from above). The soul sand bubble column will push items upward through all of these. The water at y=4 must also be a source — otherwise bubbles break mid-shaft.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:soul_sand"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},{"x":-1,"y":0,"z":0,"block":"minecraft:stone"},{"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":0,"y":0,"z":-1,"block":"minecraft:stone"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:stone"},{"x":-1,"y":1,"z":0,"block":"minecraft:stone"},{"x":0,"y":1,"z":1,"block":"minecraft:stone"},{"x":0,"y":1,"z":-1,"block":"minecraft:stone"},
+        {"x":1,"y":2,"z":0,"block":"minecraft:stone"},{"x":-1,"y":2,"z":0,"block":"minecraft:stone"},{"x":0,"y":2,"z":1,"block":"minecraft:stone"},{"x":0,"y":2,"z":-1,"block":"minecraft:stone"},
+        {"x":1,"y":3,"z":0,"block":"minecraft:stone"},{"x":-1,"y":3,"z":0,"block":"minecraft:stone"},{"x":0,"y":3,"z":1,"block":"minecraft:stone"},{"x":0,"y":3,"z":-1,"block":"minecraft:stone"},
+        {"x":1,"y":4,"z":0,"block":"minecraft:stone"},{"x":-1,"y":4,"z":0,"block":"minecraft:stone"},{"x":0,"y":4,"z":1,"block":"minecraft:stone"},{"x":0,"y":4,"z":-1,"block":"minecraft:stone"},
+        {"x":1,"y":5,"z":0,"block":"minecraft:stone"},{"x":-1,"y":5,"z":0,"block":"minecraft:stone"},{"x":0,"y":5,"z":1,"block":"minecraft:stone"},{"x":0,"y":5,"z":-1,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:water[level=0]"},
+        {"x":0,"y":2,"z":0,"block":"minecraft:water[level=0]"},
+        {"x":0,"y":3,"z":0,"block":"minecraft:water[level=0]"},
+        {"x":0,"y":4,"z":0,"block":"minecraft:water[level=0]"}
+      ]
+    },
+    {
+      "title": "Input hopper, output hopper, and cap",
+      "explanation": "Place a hopper at (0,-1,0) facing up (into the soul sand) to receive items and push them into the bubble column. At the top, place a stone cap at y=5 with a sign or trapdoor on one side to keep the water in. Add a hopper at (0,5,0) facing into a chest at (0,5,-1) to catch items as they surface. Items dropped into the bottom hopper will ride the bubbles to the top chest automatically.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:soul_sand"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},{"x":-1,"y":0,"z":0,"block":"minecraft:stone"},{"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":0,"y":0,"z":-1,"block":"minecraft:stone"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:stone"},{"x":-1,"y":1,"z":0,"block":"minecraft:stone"},{"x":0,"y":1,"z":1,"block":"minecraft:stone"},{"x":0,"y":1,"z":-1,"block":"minecraft:stone"},
+        {"x":1,"y":2,"z":0,"block":"minecraft:stone"},{"x":-1,"y":2,"z":0,"block":"minecraft:stone"},{"x":0,"y":2,"z":1,"block":"minecraft:stone"},{"x":0,"y":2,"z":-1,"block":"minecraft:stone"},
+        {"x":1,"y":3,"z":0,"block":"minecraft:stone"},{"x":-1,"y":3,"z":0,"block":"minecraft:stone"},{"x":0,"y":3,"z":1,"block":"minecraft:stone"},{"x":0,"y":3,"z":-1,"block":"minecraft:stone"},
+        {"x":1,"y":4,"z":0,"block":"minecraft:stone"},{"x":-1,"y":4,"z":0,"block":"minecraft:stone"},{"x":0,"y":4,"z":1,"block":"minecraft:stone"},{"x":0,"y":4,"z":-1,"block":"minecraft:stone"},
+        {"x":1,"y":5,"z":0,"block":"minecraft:stone"},{"x":-1,"y":5,"z":0,"block":"minecraft:stone"},{"x":0,"y":5,"z":1,"block":"minecraft:stone"},{"x":0,"y":5,"z":-1,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:water[level=0]"},
+        {"x":0,"y":2,"z":0,"block":"minecraft:water[level=0]"},
+        {"x":0,"y":3,"z":0,"block":"minecraft:water[level=0]"},
+        {"x":0,"y":4,"z":0,"block":"minecraft:water[level=0]"},
+        {"x":0,"y":5,"z":0,"block":"minecraft:hopper[enabled=true,facing=north]"},
+        {"x":0,"y":5,"z":-1,"block":"minecraft:chest[facing=north,type=single,waterlogged=false]"},
+        {"x":0,"y":-1,"z":0,"block":"minecraft:hopper[enabled=true,facing=up]"}
+      ]
+    }
+  ]
 }

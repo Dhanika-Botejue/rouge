@@ -1,9 +1,53 @@
 {
   "id": "torch-clock",
-  "title": "Torch Clock (3-Torch)",
+  "title": "Torch Clock (3-Torch Ring)",
   "category": "timing",
-  "description": "Fastest repeating clock in Minecraft. Three redstone torches in a triangle — each torch's output powers the next torch's base, turning it off and creating a looping pulse. Runs at roughly 3 ticks per cycle (1.5 game ticks). Unstable on some hardware; use a hopper clock for precision.",
-  "inputs": [],
+  "description": "Three wall torches in a triangle, each suppressing the next. Because each torch's output powers the base of the next torch, they take turns switching off in sequence — creating a fast oscillating signal. Period is roughly 3 game ticks (1.5 redstone ticks). Unstable on some hardware; prefer a hopper clock or dropper clock for precision timing.",
   "outputs": ["clock_signal"],
-  "footprint": "2x2x2"
+  "aliases": ["3 torch clock", "torch oscillator", "fast clock"],
+  "footprint": "3x2x3",
+  "steps": [
+    {
+      "title": "Stone base",
+      "explanation": "Five stone blocks: three at the triangle corners (0,0,0), (2,0,0), (2,0,2) and a fourth corner (0,0,2), plus a connector block (0,0,1) on the west side. The west column is the feedback path that closes the ring.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"}
+      ]
+    },
+    {
+      "title": "Three wall torches",
+      "explanation": "Torch_A on the east face of (0,0,0), Torch_B on the south face of (2,0,0), Torch_C on the west face of (2,0,2). Each torch outputs into the next corner stone: A→B, B→C, C→west column. The ring is now live — you should see them flicker.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"},
+        {"x":2,"y":0,"z":1,"block":"minecraft:redstone_wall_torch[facing=south,lit=true]"},
+        {"x":1,"y":0,"z":2,"block":"minecraft:redstone_wall_torch[facing=west,lit=true]"}
+      ]
+    },
+    {
+      "title": "Feedback dust and output tap",
+      "explanation": "Torch_C's output powers stone (0,0,2). Run dust up the west column: (0,1,2)→(0,1,1)→(0,1,0). The dust at (0,1,0) strongly powers stone (0,0,0), which suppresses Torch_A — closing the ring. Tap your clock signal from any of these three dust positions.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"},
+        {"x":2,"y":0,"z":1,"block":"minecraft:redstone_wall_torch[facing=south,lit=true]"},
+        {"x":1,"y":0,"z":2,"block":"minecraft:redstone_wall_torch[facing=west,lit=true]"},
+        {"x":0,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":0,"y":1,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:redstone_wire"}
+      ]
+    }
+  ]
 }

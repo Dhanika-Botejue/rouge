@@ -2,7 +2,77 @@
   "id": "piston-door-3x3",
   "title": "3x3 Piston Door",
   "category": "door",
-  "description": "A 3x3 flush door using double piston extenders so the corner blocks can clear a 3-wide opening. Each of the four corners is driven by a double extender (a sticky piston pushing another sticky piston) so the corner block travels two spaces out of the doorway; the center edges use single sticky pistons. All extenders must fire in the correct order, so the control circuit chains observers or repeater delays: the outer (rear) pistons fire first, the inner (front) pistons a tick later. A lever or button on each side feeds a shared redstone line behind the wall. This is an advanced build — keep the two sides mirrored and give yourself at least 2 blocks of wall depth for the extender mechanism.",
+  "description": "A 3-block-wide, 3-block-tall hidden door using 6 sticky pistons. Bottom pistons (facing up) push the lower door section upward into the top frame; top pistons (facing down) push the top section into the lower frame. Both sets are triggered from a single lever, with a NOT gate so they fire on opposite lever states. The door opens and closes cleanly on toggle.",
+  "inputs": ["toggle"],
+  "outputs": [],
   "aliases": ["3x3 door", "big piston door", "jeb door", "vault door"],
-  "footprint": "5x5x4"
+  "footprint": "5x5x4",
+  "steps": [
+    {
+      "title": "Build the doorway frame",
+      "explanation": "Stone frame: top beam at y=4 (x=0–4), bottom beam at y=0, left column (x=0, y=1–3), right column (x=4, y=1–3). This creates a 3×3 opening at x=1–3, y=1–3 at z=0. Add matching stone backing at z=2 — this is where the redstone wiring will run.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},{"x":1,"y":0,"z":0,"block":"minecraft:stone"},{"x":2,"y":0,"z":0,"block":"minecraft:stone"},{"x":3,"y":0,"z":0,"block":"minecraft:stone"},{"x":4,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":4,"z":0,"block":"minecraft:stone"},{"x":1,"y":4,"z":0,"block":"minecraft:stone"},{"x":2,"y":4,"z":0,"block":"minecraft:stone"},{"x":3,"y":4,"z":0,"block":"minecraft:stone"},{"x":4,"y":4,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:stone"},{"x":0,"y":2,"z":0,"block":"minecraft:stone"},{"x":0,"y":3,"z":0,"block":"minecraft:stone"},
+        {"x":4,"y":1,"z":0,"block":"minecraft:stone"},{"x":4,"y":2,"z":0,"block":"minecraft:stone"},{"x":4,"y":3,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},{"x":1,"y":0,"z":2,"block":"minecraft:stone"},{"x":2,"y":0,"z":2,"block":"minecraft:stone"},{"x":3,"y":0,"z":2,"block":"minecraft:stone"},{"x":4,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":4,"z":2,"block":"minecraft:stone"},{"x":1,"y":4,"z":2,"block":"minecraft:stone"},{"x":2,"y":4,"z":2,"block":"minecraft:stone"},{"x":3,"y":4,"z":2,"block":"minecraft:stone"},{"x":4,"y":4,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":2,"block":"minecraft:stone"},{"x":0,"y":2,"z":2,"block":"minecraft:stone"},{"x":0,"y":3,"z":2,"block":"minecraft:stone"},
+        {"x":4,"y":1,"z":2,"block":"minecraft:stone"},{"x":4,"y":2,"z":2,"block":"minecraft:stone"},{"x":4,"y":3,"z":2,"block":"minecraft:stone"}
+      ]
+    },
+    {
+      "title": "Door blocks and six sticky pistons",
+      "explanation": "Fill the 3×3 opening with orange wool: x=1–3, y=1–3 at z=1 (9 blocks). Place sticky pistons facing UP at y=0, x=1,2,3, z=1 — they push the bottom two wool rows upward to open. Place sticky pistons facing DOWN at y=4, x=1,2,3, z=1 — they push the top wool row downward to open.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},{"x":1,"y":0,"z":0,"block":"minecraft:stone"},{"x":2,"y":0,"z":0,"block":"minecraft:stone"},{"x":3,"y":0,"z":0,"block":"minecraft:stone"},{"x":4,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":4,"z":0,"block":"minecraft:stone"},{"x":1,"y":4,"z":0,"block":"minecraft:stone"},{"x":2,"y":4,"z":0,"block":"minecraft:stone"},{"x":3,"y":4,"z":0,"block":"minecraft:stone"},{"x":4,"y":4,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:stone"},{"x":0,"y":2,"z":0,"block":"minecraft:stone"},{"x":0,"y":3,"z":0,"block":"minecraft:stone"},
+        {"x":4,"y":1,"z":0,"block":"minecraft:stone"},{"x":4,"y":2,"z":0,"block":"minecraft:stone"},{"x":4,"y":3,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},{"x":1,"y":0,"z":2,"block":"minecraft:stone"},{"x":2,"y":0,"z":2,"block":"minecraft:stone"},{"x":3,"y":0,"z":2,"block":"minecraft:stone"},{"x":4,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":4,"z":2,"block":"minecraft:stone"},{"x":1,"y":4,"z":2,"block":"minecraft:stone"},{"x":2,"y":4,"z":2,"block":"minecraft:stone"},{"x":3,"y":4,"z":2,"block":"minecraft:stone"},{"x":4,"y":4,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":2,"block":"minecraft:stone"},{"x":0,"y":2,"z":2,"block":"minecraft:stone"},{"x":0,"y":3,"z":2,"block":"minecraft:stone"},
+        {"x":4,"y":1,"z":2,"block":"minecraft:stone"},{"x":4,"y":2,"z":2,"block":"minecraft:stone"},{"x":4,"y":3,"z":2,"block":"minecraft:stone"},
+        {"x":1,"y":1,"z":1,"block":"minecraft:orange_wool"},{"x":2,"y":1,"z":1,"block":"minecraft:orange_wool"},{"x":3,"y":1,"z":1,"block":"minecraft:orange_wool"},
+        {"x":1,"y":2,"z":1,"block":"minecraft:orange_wool"},{"x":2,"y":2,"z":1,"block":"minecraft:orange_wool"},{"x":3,"y":2,"z":1,"block":"minecraft:orange_wool"},
+        {"x":1,"y":3,"z":1,"block":"minecraft:orange_wool"},{"x":2,"y":3,"z":1,"block":"minecraft:orange_wool"},{"x":3,"y":3,"z":1,"block":"minecraft:orange_wool"},
+        {"x":1,"y":0,"z":1,"block":"minecraft:sticky_piston[extended=false,facing=up]"},
+        {"x":2,"y":0,"z":1,"block":"minecraft:sticky_piston[extended=false,facing=up]"},
+        {"x":3,"y":0,"z":1,"block":"minecraft:sticky_piston[extended=false,facing=up]"},
+        {"x":1,"y":4,"z":1,"block":"minecraft:sticky_piston[extended=false,facing=down]"},
+        {"x":2,"y":4,"z":1,"block":"minecraft:sticky_piston[extended=false,facing=down]"},
+        {"x":3,"y":4,"z":1,"block":"minecraft:sticky_piston[extended=false,facing=down]"}
+      ]
+    },
+    {
+      "title": "Redstone wiring and lever",
+      "explanation": "Behind the frame at z=2: dust at (x=1,2,3, y=1) powers the bottom pistons; dust at (x=1,2,3, y=3) powers the top pistons. Connect the two lines down the right side using a vertical run at (x=4, z=3). A wall torch at (4,2,2) facing east inverts the signal for the top pistons so they do the opposite of the bottom pistons. Place the lever at (5,1,2) facing west — flip it to open/close.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},{"x":1,"y":0,"z":0,"block":"minecraft:stone"},{"x":2,"y":0,"z":0,"block":"minecraft:stone"},{"x":3,"y":0,"z":0,"block":"minecraft:stone"},{"x":4,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":4,"z":0,"block":"minecraft:stone"},{"x":1,"y":4,"z":0,"block":"minecraft:stone"},{"x":2,"y":4,"z":0,"block":"minecraft:stone"},{"x":3,"y":4,"z":0,"block":"minecraft:stone"},{"x":4,"y":4,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:stone"},{"x":0,"y":2,"z":0,"block":"minecraft:stone"},{"x":0,"y":3,"z":0,"block":"minecraft:stone"},
+        {"x":4,"y":1,"z":0,"block":"minecraft:stone"},{"x":4,"y":2,"z":0,"block":"minecraft:stone"},{"x":4,"y":3,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},{"x":1,"y":0,"z":2,"block":"minecraft:stone"},{"x":2,"y":0,"z":2,"block":"minecraft:stone"},{"x":3,"y":0,"z":2,"block":"minecraft:stone"},{"x":4,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":4,"z":2,"block":"minecraft:stone"},{"x":1,"y":4,"z":2,"block":"minecraft:stone"},{"x":2,"y":4,"z":2,"block":"minecraft:stone"},{"x":3,"y":4,"z":2,"block":"minecraft:stone"},{"x":4,"y":4,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":2,"block":"minecraft:stone"},{"x":0,"y":2,"z":2,"block":"minecraft:stone"},{"x":0,"y":3,"z":2,"block":"minecraft:stone"},
+        {"x":4,"y":1,"z":2,"block":"minecraft:stone"},{"x":4,"y":2,"z":2,"block":"minecraft:stone"},{"x":4,"y":3,"z":2,"block":"minecraft:stone"},
+        {"x":1,"y":1,"z":1,"block":"minecraft:orange_wool"},{"x":2,"y":1,"z":1,"block":"minecraft:orange_wool"},{"x":3,"y":1,"z":1,"block":"minecraft:orange_wool"},
+        {"x":1,"y":2,"z":1,"block":"minecraft:orange_wool"},{"x":2,"y":2,"z":1,"block":"minecraft:orange_wool"},{"x":3,"y":2,"z":1,"block":"minecraft:orange_wool"},
+        {"x":1,"y":3,"z":1,"block":"minecraft:orange_wool"},{"x":2,"y":3,"z":1,"block":"minecraft:orange_wool"},{"x":3,"y":3,"z":1,"block":"minecraft:orange_wool"},
+        {"x":1,"y":0,"z":1,"block":"minecraft:sticky_piston[extended=false,facing=up]"},
+        {"x":2,"y":0,"z":1,"block":"minecraft:sticky_piston[extended=false,facing=up]"},
+        {"x":3,"y":0,"z":1,"block":"minecraft:sticky_piston[extended=false,facing=up]"},
+        {"x":1,"y":4,"z":1,"block":"minecraft:sticky_piston[extended=false,facing=down]"},
+        {"x":2,"y":4,"z":1,"block":"minecraft:sticky_piston[extended=false,facing=down]"},
+        {"x":3,"y":4,"z":1,"block":"minecraft:sticky_piston[extended=false,facing=down]"},
+        {"x":1,"y":1,"z":2,"block":"minecraft:redstone_wire"},{"x":2,"y":1,"z":2,"block":"minecraft:redstone_wire"},{"x":3,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":4,"y":1,"z":3,"block":"minecraft:redstone_wire"},{"x":4,"y":2,"z":3,"block":"minecraft:stone"},{"x":4,"y":3,"z":3,"block":"minecraft:redstone_wire"},
+        {"x":1,"y":3,"z":2,"block":"minecraft:redstone_wire"},{"x":2,"y":3,"z":2,"block":"minecraft:redstone_wire"},{"x":3,"y":3,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":4,"y":2,"z":2,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"},
+        {"x":5,"y":1,"z":2,"block":"minecraft:stone"},
+        {"x":5,"y":1,"z":3,"block":"minecraft:lever[face=floor,facing=north,powered=false]"}
+      ]
+    }
+  ]
 }

@@ -2,8 +2,46 @@
   "id": "hopper-clock",
   "title": "Hopper Clock",
   "category": "timing",
-  "description": "Two hoppers facing each other, passing items back and forth. Each hopper's comparator output pulses when items arrive. Period is adjustable by changing the item count — more items = slower clock. Far more stable than torch clocks and survives chunk reload.",
-  "inputs": [],
+  "description": "Two hoppers face each other and pass items back and forth. A comparator reads one hopper's fill level and outputs a signal each time items arrive. Period is proportional to item count — more items means a slower clock. Far more stable than torch clocks and survives chunk reload without drifting.",
   "outputs": ["clock_signal"],
-  "footprint": "3x3x1"
+  "aliases": ["hopper timer", "item clock", "hopper oscillator"],
+  "footprint": "3x2x2",
+  "steps": [
+    {
+      "title": "Stone floor",
+      "explanation": "Four stone blocks: two under the hoppers, one under the comparator, one under the output lamp. Everything runs at y=1 on this base.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"}
+      ]
+    },
+    {
+      "title": "Two facing hoppers",
+      "explanation": "Hopper A at (0,1,0) facing east, Hopper B at (1,1,0) facing west. They output items into each other, creating a loop. Place 1–5 items inside Hopper A to seed the clock — more items make it slower. The clock will not run until seeded.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:hopper[enabled=true,facing=east]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:hopper[enabled=true,facing=west]"}
+      ]
+    },
+    {
+      "title": "Comparator and output lamp",
+      "explanation": "Place a comparator at (0,1,1) facing south — its back reads Hopper A to the north, its front outputs south. The lamp at (0,1,2) lights when Hopper A has items and dims when they transfer away, giving you a toggling clock signal. Tap the comparator's south output for any redstone circuit.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:hopper[enabled=true,facing=east]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:hopper[enabled=true,facing=west]"},
+        {"x":0,"y":1,"z":1,"block":"minecraft:comparator[facing=south,mode=compare,powered=false]"},
+        {"x":0,"y":1,"z":2,"block":"minecraft:redstone_lamp"}
+      ]
+    }
+  ]
 }
