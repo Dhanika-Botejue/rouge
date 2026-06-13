@@ -193,6 +193,11 @@ public final class LessonManager {
 
     /** Places the full solution into the world (the answer key). */
     public static void placeSolution() {
+        // When a step-by-step build is active, complete it all at once.
+        if (StepSession.isActive()) {
+            StepSession.completeAll();
+            return;
+        }
         if (solution == null) {
             ChatDisplay.error("No active build. Ask Rouge to teach you something, or /rouge load a sample.");
             return;

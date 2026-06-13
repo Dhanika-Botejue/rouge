@@ -145,6 +145,25 @@ public final class StepSession {
         showStep();
     }
 
+    /**
+     * Places every block in the build at once and ends the session.
+     * Uses the last step's cumulative block list (which contains all blocks).
+     * Called by /rouge solution so the player can skip straight to the finished build.
+     */
+    public static void completeAll() {
+        if (plan == null) return;
+        List<BlockEntry> all = plan.steps().get(plan.steps().size() - 1).blocks();
+        if (!WorldPlacer.placeStepBlocks(all, anchor)) {
+            ChatDisplay.system("Can only place blocks in singleplayer.");
+            return;
+        }
+        String circuit = plan.circuit();
+        plan = null;
+        LessonManager.clearLesson();
+        RougeSession.endBuildMode();
+        ChatDisplay.system("Placed the full " + circuit + " — done!");
+    }
+
     /** Cancels the build and clears the hologram. */
     public static void stop() {
         if (plan == null) return;

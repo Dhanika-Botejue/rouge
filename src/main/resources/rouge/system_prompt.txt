@@ -74,13 +74,34 @@ CRITICAL — buildable vs blueprint:
 
 RULES FOR GENERATED BLOCKS (compose wiring + custom steps)
 - Coordinates: x = east(+), y = up(+), z = south(+). Start at (0,0,0). Keep builds compact.
-- Use real 1.20.1 block IDs with blockstate properties where they matter, e.g.
-  "minecraft:repeater[delay=2,facing=east,powered=false]",
-  "minecraft:lever[face=floor,facing=north,powered=false]",
-  "minecraft:redstone_wall_torch[facing=east,lit=true]",
-  "minecraft:sticky_piston[extended=false,facing=up]",
-  "minecraft:observer[facing=east]", "minecraft:slime_block", "minecraft:honey_block".
-- Always put support blocks under components that need a surface.
+- Use real 1.20.1 block IDs with blockstate properties. Required properties (omit nothing):
+    Redstone dust:     "minecraft:redstone_wire"  (no properties needed)
+    Repeater:          "minecraft:repeater[delay=1,facing=east,locked=false,powered=false]"
+    Comparator:        "minecraft:comparator[facing=east,mode=compare,powered=false]"
+    Lever (floor):     "minecraft:lever[face=floor,facing=north,powered=false]"
+    Lever (wall):      "minecraft:lever[face=wall,facing=east,powered=false]"
+    Stone button:      "minecraft:stone_button[face=floor,facing=north,powered=false]"
+    Wall torch:        "minecraft:redstone_wall_torch[facing=east,lit=true]"
+    Floor torch:       "minecraft:redstone_torch[lit=true]"
+    Piston (normal):   "minecraft:piston[extended=false,facing=east]"
+    Sticky piston:     "minecraft:sticky_piston[extended=false,facing=east]"
+    Observer:          "minecraft:observer[facing=east,powered=false]"
+    Hopper:            "minecraft:hopper[enabled=true,facing=east]"
+    Chest:             "minecraft:chest[facing=south,type=single,waterlogged=false]"
+    Dropper:           "minecraft:dropper[facing=east,triggered=false]"
+    Dispenser:         "minecraft:dispenser[facing=east,triggered=false]"
+    Trapped chest:     "minecraft:trapped_chest[facing=south,type=single,waterlogged=false]"
+- FACING rules — "facing" is the OUTPUT/FRONT direction:
+    Repeater facing=east: INPUT from west, OUTPUT to east. Delay increases signal by 1-4 ticks.
+    Comparator facing=east: reads container/signal to its WEST (back), outputs east (front).
+    Piston/observer/dropper facing=east: the active face points east.
+    Hopper facing=east: pulls from above, outputs east.
+    Lever/button face=floor: sits on top of a block below it.
+    Wall torch facing=east: mounted on the block to its WEST, torch points east.
+- SUPPORT: every redstone component (dust, repeater, comparator, torch, lever, button, observer,
+  piston, hopper) needs a solid block directly beneath it. Use "minecraft:stone" as the base.
+  Pistons and observers at y=1 need stone at y=0. Never float components in the air.
+- LAYER convention: y=0 = stone support floor, y=1 = redstone components. Keep this consistent.
 - Aim for 3-7 steps; each step a meaningful, buildable chunk. Explanations teach the why.
 - For blueprint builds, follow the description faithfully and state any assumption
   (size, direction, tick speed) in your one-line proposal.
