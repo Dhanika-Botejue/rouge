@@ -1,0 +1,8 @@
+{
+  "id": "piston-door-2x2",
+  "title": "2x2 Piston Door",
+  "category": "door",
+  "description": "A flush 2x2 sliding door made of four sticky pistons that retract their blocks into the walls. Layout: a 2-wide, 2-tall doorway; one sticky piston on each side at each height (4 pistons total) facing inward, each with a building block on the piston head to fill the doorway when extended. Both sides must fire together. Power is delivered by running redstone behind the wall to all four pistons, usually triggered by levers or pressure plates on both faces wired together with redstone dust and a couple of repeaters to keep the signal reaching every piston. The pistons sit one block back from the doorway so the door is flush with the wall when closed. Build the right and left halves symmetrically.",
+  "aliases": ["2x2 door", "piston door", "hidden door", "redstone door"],
+  "footprint": "4x3x3"
+}

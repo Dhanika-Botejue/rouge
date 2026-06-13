@@ -1,24 +1,15 @@
 package dev.dhanika.rouge.command;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import dev.dhanika.rouge.build.Difficulty.Level;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import dev.dhanika.rouge.chat.ChatDisplay;
 import dev.dhanika.rouge.session.RougeSession;
-import dev.dhanika.rouge.teach.LessonManager;
+import dev.dhanika.rouge.teach.StepSession;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
-/**
- * Registers Rouge's client-side commands.
- * <p>
- * {@code /rouge} (no args) toggles the chat session. Subcommands drive the build
- * pipeline: {@code load} (sample lesson), {@code solution} (place the answer key).
- * New subcommands are one more {@code .then(...)} below — no other wiring needed.
- */
 public final class RougeCommands {
 
-    private RougeCommands() {
-    }
+    private RougeCommands() {}
 
     public static void register() {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) ->
@@ -27,34 +18,32 @@ public final class RougeCommands {
                             RougeSession.toggle();
                             return 1;
                         })
-                        .then(ClientCommandManager.literal("load")
+                        .then(ClientCommandManager.literal("next")
                                 .executes(ctx -> {
-                                    LessonManager.loadSample();
+                                    StepSession.next();
                                     return 1;
                                 }))
-                        .then(ClientCommandManager.literal("solution")
+                        .then(ClientCommandManager.literal("step")
                                 .executes(ctx -> {
-                                    LessonManager.placeSolution();
+                                    StepSession.showCurrent();
                                     return 1;
                                 }))
-                        .then(ClientCommandManager.literal("check")
+                        .then(ClientCommandManager.literal("stop")
                                 .executes(ctx -> {
-                                    LessonManager.check();
+                                    StepSession.stop();
                                     return 1;
                                 }))
-                        .then(levelNode())));
-    }
-
-    /** {@code /rouge level <basic|easy|medium|hard>} — one child per difficulty. */
-    private static LiteralArgumentBuilder<FabricClientCommandSource> levelNode() {
-        LiteralArgumentBuilder<FabricClientCommandSource> node = ClientCommandManager.literal("level");
-        for (Level lvl : Level.values()) {
-            node.then(ClientCommandManager.literal(lvl.lower())
-                    .executes(ctx -> {
-                        LessonManager.setLevel(lvl);
-                        return 1;
-                    }));
-        }
-        return node;
+                        .then(ClientCommandManager.literal("model")
+                                .then(ClientCommandManager.argument("id", StringArgumentType.greedyString())
+                                        .executes(ctx -> {
+                                            String id = StringArgumentType.getString(ctx, "id");
+                                            RougeSession.setModel(id);
+                                            ChatDisplay.system("Model set to: " + id);
+                                            return 1;
+                                        }))
+                                .executes(ctx -> {
+                                    ChatDisplay.system("Current model: " + RougeSession.getModel());
+                                    return 1;
+                                }))));
     }
 }

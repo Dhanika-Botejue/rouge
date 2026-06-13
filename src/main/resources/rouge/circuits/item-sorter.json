@@ -1,0 +1,8 @@
+{
+  "id": "item-sorter",
+  "title": "Hopper Item Sorter",
+  "category": "storage",
+  "description": "Automatically routes a chosen item into its own chest. The classic single-item sorter: an input hopper feeds a horizontal 'sorter' hopper that points into a chest; the sorter hopper is filled with 18 of a 'filter' item (one stack of 4 + one of the target item across the first slots, the standard 41-4-1 trick is overkill — the simple version uses 4 filler items + the target). A comparator reads the sorter hopper and, via a redstone line into the hopper underneath, keeps non-matching items flowing past while matching items drop into the chest. Chain multiple sorter modules side by side, one per item type, along a shared hopper line. Requires comparators, redstone dust, and one filler item per slot.",
+  "aliases": ["item sorter", "auto sorter", "storage sorter", "hopper sorter"],
+  "footprint": "5x3x2"
+}

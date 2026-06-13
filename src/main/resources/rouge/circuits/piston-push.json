@@ -1,0 +1,43 @@
+{
+  "id": "piston-push",
+  "title": "Piston Push (Single)",
+  "category": "transport",
+  "description": "A piston extends to push a block one space when powered and retracts when the signal is removed. Sticky pistons pull the block back on retraction. The piston's facing determines push direction — rotate it before powering. Cannot push obsidian, bedrock, or extended pistons.",
+  "inputs": ["power"],
+  "outputs": [],
+  "footprint": "3x2x1",
+  "steps": [
+    {
+      "title": "Stone base",
+      "explanation": "Three stone blocks in a line. The piston goes on the middle stone, the moveable block on the right.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"}
+      ]
+    },
+    {
+      "title": "Lever and piston",
+      "explanation": "Lever on the left stone (the power source). Sticky piston on the middle stone facing east — it will push and pull the target block.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:lever[face=floor,facing=south,powered=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:sticky_piston[extended=false,facing=east]"}
+      ]
+    },
+    {
+      "title": "Target block",
+      "explanation": "Place a coloured wool block directly in front of the piston head. Flip the lever — the piston pushes it one block east. Flip back — it pulls it back. This mechanism is the basis for piston doors, flying machines, and item movers.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:lever[face=floor,facing=south,powered=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:sticky_piston[extended=false,facing=east]"},
+        {"x":2,"y":1,"z":0,"block":"minecraft:yellow_wool"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "id": "tnt-duper",
+  "title": "TNT Duplicator",
+  "category": "tnt",
+  "description": "Duplicates TNT for free using a 0-tick piston trick (Java Edition). Setup: a sticky piston with a slime block (or any pushable block) on its head, an observer wired so a redstone pulse extends the piston, and one already-primed TNT entity sitting in front of the piston's block. When the piston extends into the space where a primed TNT was, the game spawns a fresh primed TNT and also leaves the moved block — netting an extra TNT each cycle. Repeat the pulse with an observer clock to dupe continuously. This is the engine behind tunnel bores and world eaters. Requires a redstone block source for the piston's slime/honey block and a primed-TNT feed. Direction the piston faces is the direction TNT accumulates.",
+  "aliases": ["tnt dupe", "tnt duplicator", "free tnt", "tnt machine"],
+  "footprint": "3x2x2"
+}

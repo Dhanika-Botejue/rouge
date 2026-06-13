@@ -1,0 +1,84 @@
+{
+  "id": "and-gate",
+  "title": "AND Gate",
+  "category": "logic",
+  "description": "Output is ON only when ALL inputs are ON. Built with two NOT gates and an OR gate (De Morgan's law): AND(A,B) = NOT(NOT(A) OR NOT(B)).",
+  "inputs": ["input_a", "input_b"],
+  "outputs": ["output"],
+  "footprint": "5x2x3",
+  "steps": [
+    {
+      "title": "Foundation",
+      "explanation": "Lay a 5-wide, 3-deep stone base. The two NOT gates go on the left half; the merging OR path is in the middle; the output is on the right.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},{"x":1,"y":0,"z":0,"block":"minecraft:stone"},{"x":2,"y":0,"z":0,"block":"minecraft:stone"},{"x":3,"y":0,"z":0,"block":"minecraft:stone"},{"x":4,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":1,"y":0,"z":1,"block":"minecraft:stone"},{"x":2,"y":0,"z":1,"block":"minecraft:stone"},{"x":3,"y":0,"z":1,"block":"minecraft:stone"},{"x":4,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},{"x":1,"y":0,"z":2,"block":"minecraft:stone"},{"x":2,"y":0,"z":2,"block":"minecraft:stone"},{"x":3,"y":0,"z":2,"block":"minecraft:stone"},{"x":4,"y":0,"z":2,"block":"minecraft:stone"}
+      ]
+    },
+    {
+      "title": "Input levers",
+      "explanation": "Place lever A at (0,1,0) and lever B at (0,1,2). Each lever feeds its own NOT gate — the inverters ensure the AND logic via De Morgan's theorem.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},{"x":1,"y":0,"z":0,"block":"minecraft:stone"},{"x":2,"y":0,"z":0,"block":"minecraft:stone"},{"x":3,"y":0,"z":0,"block":"minecraft:stone"},{"x":4,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":1,"y":0,"z":1,"block":"minecraft:stone"},{"x":2,"y":0,"z":1,"block":"minecraft:stone"},{"x":3,"y":0,"z":1,"block":"minecraft:stone"},{"x":4,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},{"x":1,"y":0,"z":2,"block":"minecraft:stone"},{"x":2,"y":0,"z":2,"block":"minecraft:stone"},{"x":3,"y":0,"z":2,"block":"minecraft:stone"},{"x":4,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:lever[face=floor,facing=south,powered=false]"},
+        {"x":0,"y":1,"z":2,"block":"minecraft:lever[face=floor,facing=south,powered=false]"}
+      ]
+    },
+    {
+      "title": "NOT gate A (top row)",
+      "explanation": "Dust from lever A feeds the anchor block at x=1,z=0. A wall torch on the east face of that block outputs the inverted signal of A.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},{"x":1,"y":0,"z":0,"block":"minecraft:stone"},{"x":2,"y":0,"z":0,"block":"minecraft:stone"},{"x":3,"y":0,"z":0,"block":"minecraft:stone"},{"x":4,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":1,"y":0,"z":1,"block":"minecraft:stone"},{"x":2,"y":0,"z":1,"block":"minecraft:stone"},{"x":3,"y":0,"z":1,"block":"minecraft:stone"},{"x":4,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},{"x":1,"y":0,"z":2,"block":"minecraft:stone"},{"x":2,"y":0,"z":2,"block":"minecraft:stone"},{"x":3,"y":0,"z":2,"block":"minecraft:stone"},{"x":4,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:lever[face=floor,facing=south,powered=false]"},
+        {"x":0,"y":1,"z":2,"block":"minecraft:lever[face=floor,facing=south,powered=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":0,"z":0,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"}
+      ]
+    },
+    {
+      "title": "NOT gate B (bottom row)",
+      "explanation": "Same as above for lever B at z=2. Now you have NOT(A) going east along z=0 and NOT(B) going east along z=2.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},{"x":1,"y":0,"z":0,"block":"minecraft:stone"},{"x":2,"y":0,"z":0,"block":"minecraft:stone"},{"x":3,"y":0,"z":0,"block":"minecraft:stone"},{"x":4,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":1,"y":0,"z":1,"block":"minecraft:stone"},{"x":2,"y":0,"z":1,"block":"minecraft:stone"},{"x":3,"y":0,"z":1,"block":"minecraft:stone"},{"x":4,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},{"x":1,"y":0,"z":2,"block":"minecraft:stone"},{"x":2,"y":0,"z":2,"block":"minecraft:stone"},{"x":3,"y":0,"z":2,"block":"minecraft:stone"},{"x":4,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:lever[face=floor,facing=south,powered=false]"},
+        {"x":0,"y":1,"z":2,"block":"minecraft:lever[face=floor,facing=south,powered=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":0,"z":0,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"},
+        {"x":1,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":0,"z":2,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"}
+      ]
+    },
+    {
+      "title": "OR merge + output lamp",
+      "explanation": "Bring NOT(A) and NOT(B) together at z=1 with two dust tiles, then carry the merged signal to a lamp. The lamp lights only when NOT(A) OR NOT(B) is ON — which is OFF only when A=1 AND B=1. That lamp output is the AND of A and B (inverted by De Morgan).",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},{"x":1,"y":0,"z":0,"block":"minecraft:stone"},{"x":2,"y":0,"z":0,"block":"minecraft:stone"},{"x":3,"y":0,"z":0,"block":"minecraft:stone"},{"x":4,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":1,"y":0,"z":1,"block":"minecraft:stone"},{"x":2,"y":0,"z":1,"block":"minecraft:stone"},{"x":3,"y":0,"z":1,"block":"minecraft:stone"},{"x":4,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},{"x":1,"y":0,"z":2,"block":"minecraft:stone"},{"x":2,"y":0,"z":2,"block":"minecraft:stone"},{"x":3,"y":0,"z":2,"block":"minecraft:stone"},{"x":4,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:lever[face=floor,facing=south,powered=false]"},
+        {"x":0,"y":1,"z":2,"block":"minecraft:lever[face=floor,facing=south,powered=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":0,"z":0,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"},
+        {"x":1,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":0,"z":2,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"},
+        {"x":4,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":4,"y":1,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":4,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":4,"y":0,"z":-1,"block":"minecraft:redstone_lamp"}
+      ]
+    }
+  ]
+}

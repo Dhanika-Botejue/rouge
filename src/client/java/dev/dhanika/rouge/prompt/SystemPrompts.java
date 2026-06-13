@@ -21,22 +21,12 @@ public final class SystemPrompts {
             + "Give concise, practical, buildable redstone advice for modern Java Edition. "
             + "Plain text only.";
 
-    private static final String COMPILER_FALLBACK =
-            "You convert a redstone sketch into a 3D Minecraft block list. Reply with ONLY "
-            + "JSON: {\"sizeX\":int,\"sizeY\":int,\"sizeZ\":int,\"blocks\":[{\"x\":int,\"y\":int,"
-            + "\"z\":int,\"block\":\"minecraft:...\",\"role\":\"input|output|component|wire|delay|support\"}]}.";
-
     private SystemPrompts() {
     }
 
     /** The redstone-tutor / chat persona. */
     public static String redstoneTutor() {
         return load("/rouge/system_prompt.txt", TUTOR_FALLBACK);
-    }
-
-    /** The sketch→build vision-compiler instructions. */
-    public static String sketchCompiler() {
-        return load("/rouge/sketch_compiler.txt", COMPILER_FALLBACK);
     }
 
     private static String load(String path, String fallback) {

@@ -1,0 +1,8 @@
+{
+  "id": "auto-sugarcane-farm",
+  "title": "Automatic Sugarcane Farm",
+  "category": "farm",
+  "description": "Harvests sugarcane the moment it grows a third block, fully hands-free. Per row: a strip of dirt or sand with water beside it, sugarcane planted on the dirt, and an observer placed behind each cane at the second-block height facing the cane. When the cane grows, the observer detects the block update and pulses a piston in front of the cane that breaks the top, dropping it. A water stream or a row of hoppers under the planting strip collects the drops into a chest. Tile the row as wide as you like; all observers and pistons share the same height. Observers make it instant and silent — no clock needed.",
+  "aliases": ["sugarcane farm", "auto farm", "cane farm", "sugar cane farm"],
+  "footprint": "6x3x3"
+}

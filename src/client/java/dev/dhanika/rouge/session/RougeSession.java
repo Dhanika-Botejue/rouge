@@ -2,85 +2,152 @@ package dev.dhanika.rouge.session;
 
 import dev.dhanika.rouge.ai.ChatMessage;
 import dev.dhanika.rouge.ai.OpenRouterClient;
+import dev.dhanika.rouge.ai.OpenRouterConfig;
+import dev.dhanika.rouge.build.BuildDirective;
+import dev.dhanika.rouge.build.CircuitLibrary;
+import dev.dhanika.rouge.build.StepPlan;
 import dev.dhanika.rouge.chat.ChatDisplay;
 import dev.dhanika.rouge.prompt.SystemPrompts;
-import dev.dhanika.rouge.teach.LessonManager;
+import dev.dhanika.rouge.teach.StepSession;
 import net.minecraft.client.Minecraft;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
- * The single source of truth for a Rouge conversation: whether it's open, the
- * running message history, and whether a request is in flight.
- * <p>
- * All state here is mutated only on the main client thread. The toggle and chat
- * hooks fire on the main thread, and the async OpenRouter reply is posted back
- * with {@link Minecraft#execute(Runnable)} before any state is touched.
- * <p>
- * History lives only while the session is open and is cleared on close (and on
- * disconnect), so each session starts fresh.
+ * Owns the conversational state machine for a Rouge session.
+ *
+ * <ul>
+ *   <li>{@code CHAT} — normal redstone Q&A. When the AI proposes a build (a
+ *       {@code ```rougebuild} / {@code ```stepplan} fence), it is parsed and held as a
+ *       pending plan, and Rouge asks the player to confirm.</li>
+ *   <li>{@code CONFIRM_BUILD} — waiting on yes/no before starting the build. "Yes" starts
+ *       the step-by-step hologram; "no" discards it; anything else is treated as a follow-up
+ *       and routed back to the AI to refine the design.</li>
+ *   <li>{@code BUILDING} — a step session is live. "next"/"yes" advances to the next step,
+ *       "stop"/"no" ends it, and any real question is routed to the AI with build context so
+ *       the player can get help mid-build.</li>
+ * </ul>
  */
 public final class RougeSession {
 
-    private static OpenRouterClient client;
+    private enum Mode { CHAT, CONFIRM_BUILD, BUILDING }
 
+    // Matches either fence name and captures the JSON body.
+    private static final Pattern FENCE =
+            Pattern.compile("```(?:rougebuild|stepplan)\\s*\\n([\\s\\S]*?)\\n?```", Pattern.DOTALL);
+
+    private static OpenRouterClient client;
+    private static OpenRouterConfig config;
     private static boolean open = false;
     private static boolean awaitingReply = false;
+    private static Mode mode = Mode.CHAT;
+    private static StepPlan pendingPlan;
     private static final List<ChatMessage> history = new ArrayList<>();
 
-    private RougeSession() {
-    }
+    private RougeSession() {}
 
-    /** Wires in the AI client. Call once from the mod initializer. */
-    public static void init(OpenRouterClient openRouterClient) {
+    public static void init(OpenRouterClient openRouterClient, OpenRouterConfig openRouterConfig) {
         client = openRouterClient;
+        config = openRouterConfig;
     }
 
-    public static boolean isOpen() {
-        return open;
-    }
+    public static String getModel() { return config.model(); }
 
-    /** Opens the session if closed, closes it if open. */
+    public static void setModel(String id) { config.setModel(id); }
+
+    public static boolean isOpen() { return open; }
+
     public static void toggle() {
-        if (open) {
-            close();
-        } else {
-            openSession();
-        }
+        if (open) close();
+        else openSession();
     }
 
     private static void openSession() {
         open = true;
         awaitingReply = false;
+        mode = Mode.CHAT;
+        pendingPlan = null;
         history.clear();
         history.add(ChatMessage.system(SystemPrompts.redstoneTutor()));
-        ChatDisplay.system("Session opened. Ask me anything about redstone. Type /rouge again to close.");
+        ChatDisplay.system("Session open. Ask me to teach you any redstone build — I'll show it step by step in-world. Type /rouge again to close.");
     }
 
     private static void close() {
         open = false;
         awaitingReply = false;
+        mode = Mode.CHAT;
+        pendingPlan = null;
         history.clear();
+        StepSession.reset();
         ChatDisplay.system("Session closed. Chat is back to normal.");
     }
 
-    /** Full reset (e.g. on disconnect) — no chat output. */
     public static void reset() {
         open = false;
         awaitingReply = false;
+        mode = Mode.CHAT;
+        pendingPlan = null;
         history.clear();
     }
 
-    /**
-     * Handles a chat message the player typed while the session is open: sends it
-     * to OpenRouter and prints the reply. Must be called on the main thread.
-     */
     public static void handleUserMessage(String text) {
-        if (!open || text == null || text.isBlank()) {
-            return;
+        if (!open || text == null || text.isBlank()) return;
+
+        switch (mode) {
+            case CONFIRM_BUILD -> handleConfirm(text);
+            case BUILDING -> handleBuilding(text);
+            case CHAT -> sendToAi(text);
         }
+    }
+
+    // --- mode handlers ---
+
+    private static void handleConfirm(String text) {
+        switch (Affirmation.of(text)) {
+            case YES -> {
+                StepPlan plan = pendingPlan;
+                pendingPlan = null;
+                mode = Mode.BUILDING;
+                StepSession.start(plan);
+                if (!StepSession.isActive()) {
+                    mode = Mode.CHAT; // start() bailed (empty plan)
+                }
+            }
+            case NO -> {
+                pendingPlan = null;
+                mode = Mode.CHAT;
+                ChatDisplay.system("No worries — ask me anything else, or describe a different build.");
+            }
+            case OTHER -> {
+                // Treat as a follow-up: drop the stale proposal and let the AI re-plan.
+                pendingPlan = null;
+                mode = Mode.CHAT;
+                sendToAi(text);
+            }
+        }
+    }
+
+    private static void handleBuilding(String text) {
+        switch (Affirmation.of(text)) {
+            case YES -> {
+                StepSession.Advance result = StepSession.next();
+                if (result != StepSession.Advance.MORE) {
+                    mode = Mode.CHAT;
+                }
+            }
+            case NO -> {
+                StepSession.stop();
+                mode = Mode.CHAT;
+            }
+            case OTHER -> sendToAi(text); // a real question mid-build — stay in BUILDING
+        }
+    }
+
+    private static void sendToAi(String text) {
         if (awaitingReply) {
             ChatDisplay.system("Rouge is still thinking… one moment.");
             return;
@@ -90,32 +157,61 @@ public final class RougeSession {
         awaitingReply = true;
         ChatDisplay.system("Rouge is thinking…");
 
-        // Inject fresh lesson context (if a build is active) without storing it in
-        // history, so Rouge tutors about the current build and the diff stays live.
+        // Per-request system context: the build library, plus the current step if building.
+        // Injected fresh each turn (not stored in history) to avoid bloating context.
         List<ChatMessage> request = new ArrayList<>(history);
-        String lessonContext = LessonManager.tutorContext();
-        if (lessonContext != null) {
-            request.add(Math.min(1, request.size()), ChatMessage.system(lessonContext));
+        int insertAt = Math.min(1, request.size());
+        request.add(insertAt, ChatMessage.system(CircuitLibrary.summary()));
+        if (mode == Mode.BUILDING) {
+            String ctx = StepSession.contextLine();
+            if (!ctx.isBlank()) {
+                request.add(insertAt + 1, ChatMessage.system(
+                        ctx + " Answer their question concisely; do NOT emit a new build unless they ask to change the design."));
+            }
         }
 
         client.complete(request).whenComplete((reply, err) ->
                 Minecraft.getInstance().execute(() -> onReply(reply, err)));
     }
 
-    /** Runs on the main thread once the request finishes (success or failure). */
     private static void onReply(String reply, Throwable err) {
         awaitingReply = false;
+        if (!open) return;
 
-        // The session may have been closed while the request was in flight.
-        if (!open) {
+        if (err != null) {
+            removeTrailingUserMessage();
+            ChatDisplay.error(rootMessage(err));
             return;
         }
 
-        if (err != null) {
-            // Drop the unanswered user turn so history doesn't end on two user
-            // messages, letting the player simply retry.
-            removeTrailingUserMessage();
-            ChatDisplay.error(rootMessage(err));
+        Matcher m = FENCE.matcher(reply);
+        boolean hasPlan = m.find();
+
+        // Mid-build: ignore any build fence so we don't interrupt the active hologram.
+        if (mode == Mode.BUILDING) {
+            String text = hasPlan ? FENCE.matcher(reply).replaceAll("").trim() : reply;
+            history.add(ChatMessage.assistant(reply));
+            if (!text.isEmpty()) ChatDisplay.print(text);
+            return;
+        }
+
+        if (hasPlan) {
+            String planJson = m.group(1).trim();
+            String chatPart = FENCE.matcher(reply).replaceAll("").trim();
+            try {
+                StepPlan plan = BuildDirective.resolve(planJson);
+                if (plan.steps().isEmpty()) throw new IllegalStateException("empty plan");
+
+                pendingPlan = plan;
+                mode = Mode.CONFIRM_BUILD;
+                history.add(ChatMessage.assistant(chatPart.isEmpty() ? "[build proposal]" : chatPart));
+                if (!chatPart.isEmpty()) ChatDisplay.print(chatPart);
+                ChatDisplay.system("Want me to walk you through building this in-world? Say \"yes\" to start, \"no\" to skip, or keep chatting to tweak it.");
+            } catch (Exception e) {
+                // Couldn't resolve the directive — fall back to showing the raw reply.
+                history.add(ChatMessage.assistant(reply));
+                ChatDisplay.print(reply);
+            }
             return;
         }
 
@@ -129,7 +225,6 @@ public final class RougeSession {
         }
     }
 
-    /** Unwraps CompletionException to surface the underlying readable message. */
     private static String rootMessage(Throwable err) {
         Throwable cause = (err instanceof CompletionException && err.getCause() != null)
                 ? err.getCause() : err;

@@ -1,0 +1,8 @@
+{
+  "id": "iron-farm",
+  "title": "Iron Farm",
+  "category": "farm",
+  "description": "Produces iron by exploiting villager panic and an iron golem spawn. Core: a small cell holding several villagers, with a 'zombie' (held in a side cell behind a trapdoor or glass so it scares the villagers without reaching them). Frightened villagers near beds trigger an iron golem to spawn on a marked spawn platform below. The golem falls or is pushed by water into a kill chamber — a drop high enough to leave it at low health, then lava blades or a player finishes it. Hoppers under the kill chamber funnel iron and poppies into a chest. Needs villagers, beds, a contained zombie, water streams for golem transport, and a hopper collection floor.",
+  "aliases": ["iron farm", "iron golem farm", "golem farm"],
+  "footprint": "9x6x9"
+}

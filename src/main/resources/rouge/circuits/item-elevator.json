@@ -1,0 +1,8 @@
+{
+  "id": "item-elevator",
+  "title": "Bubble Column Item Elevator",
+  "category": "transport",
+  "description": "Carries dropped items straight up using a soul-sand bubble column. Build a vertical 1x1 shaft of any solid block, place a soul sand block at the bottom, and fill every shaft block with water source (in 1.20 each level becomes a source inside the column). Soul sand creates upward bubbles that drag items and the player upward; magma block would pull them down instead. Feed items in at the bottom with a hopper or dropper, and catch them at the top with a hopper into a chest. Cap the top with a solid block and a sign or trapdoor to hold the water in. Fast, cheap, and silent — the standard way to move items between floors.",
+  "aliases": ["item elevator", "water elevator", "bubble elevator", "item lift"],
+  "footprint": "1x6x1"
+}

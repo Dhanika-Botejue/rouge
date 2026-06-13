@@ -1,0 +1,61 @@
+{
+  "id": "repeater-delay",
+  "title": "Repeater Delay Line",
+  "category": "timing",
+  "description": "A chain of repeaters to delay a signal. Each repeater adds 1–4 redstone ticks (0.1–0.4 s). Chain them for longer delays. Also boosts signal strength back to 15 after every repeater — essential for long wire runs. Click a repeater to change its delay.",
+  "inputs": ["input"],
+  "outputs": ["delayed_output"],
+  "footprint": "Nx2x1",
+  "steps": [
+    {
+      "title": "Stone base",
+      "explanation": "Place a line of stone blocks as a base. Each stone will hold one repeater.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":3,"y":0,"z":0,"block":"minecraft:stone"}
+      ]
+    },
+    {
+      "title": "Input lever",
+      "explanation": "Place a lever at the west end to drive the signal. Flip it to send a pulse through all the repeaters.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":3,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:lever[face=floor,facing=south,powered=false]"}
+      ]
+    },
+    {
+      "title": "Repeater chain",
+      "explanation": "Place 3 repeaters on the remaining stones, all facing east (delay=1 each). Signal travels left to right with a 1-tick delay per repeater. Click a repeater to increase its delay — the lit indicator shows the delay tick count.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":3,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:lever[face=floor,facing=south,powered=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:repeater[delay=1,facing=east,locked=false,powered=false]"},
+        {"x":2,"y":1,"z":0,"block":"minecraft:repeater[delay=1,facing=east,locked=false,powered=false]"},
+        {"x":3,"y":1,"z":0,"block":"minecraft:repeater[delay=1,facing=east,locked=false,powered=false]"}
+      ]
+    },
+    {
+      "title": "Output lamp",
+      "explanation": "Add a lamp at the far end. It lights after the combined delay of all repeaters. Total delay here = 3 ticks (0.15 s). Add more repeaters or increase delays to extend the gap.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":3,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:lever[face=floor,facing=south,powered=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:repeater[delay=1,facing=east,locked=false,powered=false]"},
+        {"x":2,"y":1,"z":0,"block":"minecraft:repeater[delay=1,facing=east,locked=false,powered=false]"},
+        {"x":3,"y":1,"z":0,"block":"minecraft:repeater[delay=1,facing=east,locked=false,powered=false]"},
+        {"x":4,"y":0,"z":0,"block":"minecraft:redstone_lamp"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "id": "double-piston-extender",
+  "title": "Double Piston Extender",
+  "category": "transport",
+  "description": "Pushes a single block two spaces out instead of one. A sticky piston faces the push direction; a second sticky piston sits behind it. When powered, the rear piston pushes the front piston forward, then the front piston extends — moving the head block two blocks total. Timing matters: the front piston must fire before the rear retracts. Built with a short repeater delay (2 ticks) on the rear piston's power line so the sequence is ordered correctly. Footprint is a 4-long line of blocks plus the redstone control line.",
+  "aliases": ["2 block piston", "piston extender", "double extender", "long piston"],
+  "footprint": "5x2x1"
+}

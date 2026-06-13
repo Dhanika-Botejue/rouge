@@ -1,0 +1,88 @@
+{
+  "id": "t-flip-flop",
+  "title": "T Flip-Flop (Toggle)",
+  "category": "memory",
+  "description": "A single button toggles the output between ON and OFF. Essential for piston doors and any on/off toggle. Built from an RS latch and a monostable (pulse shortener) on the input.",
+  "inputs": ["toggle"],
+  "outputs": ["q"],
+  "footprint": "6x2x3",
+  "steps": [
+    {
+      "title": "Build the RS latch",
+      "explanation": "Place the RS NOR latch as your memory core. The toggle circuit will feed carefully timed pulses to S and R so only one fires at a time.",
+      "blocks": [
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},{"x":3,"y":0,"z":0,"block":"minecraft:stone"},{"x":4,"y":0,"z":0,"block":"minecraft:stone"},{"x":5,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":1,"block":"minecraft:stone"},{"x":3,"y":0,"z":1,"block":"minecraft:stone"},{"x":4,"y":0,"z":1,"block":"minecraft:stone"},{"x":5,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":2,"block":"minecraft:stone"},{"x":3,"y":0,"z":2,"block":"minecraft:stone"},{"x":4,"y":0,"z":2,"block":"minecraft:stone"},{"x":5,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":3,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":4,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":5,"y":0,"z":0,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"},
+        {"x":3,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":4,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":5,"y":0,"z":2,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"},
+        {"x":6,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":6,"y":1,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":6,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":1,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":4,"y":1,"z":1,"block":"minecraft:redstone_wire"}
+      ]
+    },
+    {
+      "title": "Toggle button + splitter",
+      "explanation": "Place a button at (0,1,1). Dust splits its signal north to z=0 and south to z=2. One path will set the latch; the other resets it — but only if the latch is currently in the opposite state (achieved via the Q and !Q feedback).",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},{"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":1,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},{"x":1,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},{"x":3,"y":0,"z":0,"block":"minecraft:stone"},{"x":4,"y":0,"z":0,"block":"minecraft:stone"},{"x":5,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":1,"block":"minecraft:stone"},{"x":3,"y":0,"z":1,"block":"minecraft:stone"},{"x":4,"y":0,"z":1,"block":"minecraft:stone"},{"x":5,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":2,"block":"minecraft:stone"},{"x":3,"y":0,"z":2,"block":"minecraft:stone"},{"x":4,"y":0,"z":2,"block":"minecraft:stone"},{"x":5,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":1,"block":"minecraft:stone_button[face=floor,facing=south,powered=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":1,"y":1,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":1,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":4,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":5,"y":0,"z":0,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"},
+        {"x":3,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":4,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":5,"y":0,"z":2,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"},
+        {"x":6,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":6,"y":1,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":6,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":1,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":4,"y":1,"z":1,"block":"minecraft:redstone_wire"}
+      ]
+    },
+    {
+      "title": "Q feedback gates",
+      "explanation": "The current Q and !Q outputs gate the two paths. The path to S is blocked when Q is already ON; the path to R is blocked when Q is OFF. This ensures each button press only fires the correct side of the latch.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},{"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":1,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},{"x":1,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},{"x":3,"y":0,"z":0,"block":"minecraft:stone"},{"x":4,"y":0,"z":0,"block":"minecraft:stone"},{"x":5,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":1,"block":"minecraft:stone"},{"x":3,"y":0,"z":1,"block":"minecraft:stone"},{"x":4,"y":0,"z":1,"block":"minecraft:stone"},{"x":5,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":2,"block":"minecraft:stone"},{"x":3,"y":0,"z":2,"block":"minecraft:stone"},{"x":4,"y":0,"z":2,"block":"minecraft:stone"},{"x":5,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":1,"block":"minecraft:stone_button[face=floor,facing=south,powered=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":1,"y":1,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":1,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":4,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":5,"y":0,"z":0,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"},
+        {"x":2,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":4,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":5,"y":0,"z":2,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"},
+        {"x":6,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":6,"y":1,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":6,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":1,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":4,"y":1,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":7,"y":0,"z":1,"block":"minecraft:redstone_lamp"}
+      ]
+    }
+  ]
+}

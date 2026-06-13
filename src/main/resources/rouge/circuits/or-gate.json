@@ -1,0 +1,85 @@
+{
+  "id": "or-gate",
+  "title": "OR Gate",
+  "category": "logic",
+  "description": "Output is ON if ANY input is ON. In Minecraft, two dust paths simply merge — no extra components needed. Signal is strength 15 from either lever.",
+  "inputs": ["input_a", "input_b"],
+  "outputs": ["output"],
+  "footprint": "3x2x3",
+  "steps": [
+    {
+      "title": "Foundation",
+      "explanation": "Place a 3x3 stone base. The two input levers go on the back corners; the output lamp goes on the front.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":2,"block":"minecraft:stone"}
+      ]
+    },
+    {
+      "title": "Input levers",
+      "explanation": "Place levers A and B on the two back corners. Each lever will independently send a signal forward.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":2,"block":"minecraft:lever[face=floor,facing=north,powered=false]"},
+        {"x":2,"y":1,"z":2,"block":"minecraft:lever[face=floor,facing=north,powered=false]"}
+      ]
+    },
+    {
+      "title": "Merging dust",
+      "explanation": "Lay dust from each lever toward the centre. Dust auto-connects — when both paths meet at x=1,z=1, either active lever powers that junction. This IS the OR operation.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":2,"block":"minecraft:lever[face=floor,facing=north,powered=false]"},
+        {"x":2,"y":1,"z":2,"block":"minecraft:lever[face=floor,facing=north,powered=false]"},
+        {"x":0,"y":1,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":1,"y":1,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":1,"z":1,"block":"minecraft:redstone_wire"}
+      ]
+    },
+    {
+      "title": "Output lamp",
+      "explanation": "Place a redstone lamp at the front (z=0, x=1). Dust carries the merged signal forward to light it. Flip either lever (or both) — the lamp turns on.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":2,"block":"minecraft:lever[face=floor,facing=north,powered=false]"},
+        {"x":2,"y":1,"z":2,"block":"minecraft:lever[face=floor,facing=north,powered=false]"},
+        {"x":0,"y":1,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":1,"y":1,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":1,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":1,"y":0,"z":-1,"block":"minecraft:redstone_lamp"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "id": "monostable",
+  "title": "Monostable Circuit (Pulse Shortener)",
+  "category": "timing",
+  "description": "Converts any input (held lever, long pulse) into a single short pulse. Uses a torch + repeater combination: the repeater delays the signal reaching the torch's suppressor input, so the torch fires briefly before turning off. Output pulse length = repeater delay (1–4 ticks).",
+  "inputs": ["input"],
+  "outputs": ["pulse"],
+  "footprint": "4x2x1"
+}

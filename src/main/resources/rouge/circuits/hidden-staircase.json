@@ -1,0 +1,8 @@
+{
+  "id": "hidden-staircase",
+  "title": "Hidden Piston Staircase",
+  "category": "door",
+  "description": "A flat wall or floor that unfolds into a staircase when triggered. Each step is a block sitting on a sticky piston facing up; the pistons are buried under the floor at progressively lower depths so that when all fire, the heads form a rising diagonal of steps. A single lever feeds a redstone line that powers every piston at once (or with small repeater delays for a cascading reveal). When unpowered the pistons retract and the steps vanish flush into the floor. Keep each piston one block lower than the previous so the extended heads make an even climb.",
+  "aliases": ["hidden staircase", "secret stairs", "piston staircase", "hidden stairs"],
+  "footprint": "5x5x3"
+}

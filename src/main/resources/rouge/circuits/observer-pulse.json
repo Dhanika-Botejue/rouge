@@ -1,0 +1,27 @@
+{
+  "id": "observer-pulse",
+  "title": "Observer Pulse",
+  "category": "detection",
+  "description": "An observer watches the block in front of its face and emits a 1-tick pulse from its back whenever that block's state changes (placed, broken, or updated). Used in block update detectors, zero-tick farms, and flying machines. The arrow on the observer's side shows which direction it observes.",
+  "inputs": ["block_update"],
+  "outputs": ["pulse"],
+  "footprint": "2x1x1",
+  "steps": [
+    {
+      "title": "Observer placement",
+      "explanation": "Place an observer block. The arrow on its face must point at the block you want to watch. Its back (the output side, with the small square) will pulse when that block changes.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:observer[facing=east,powered=false]"}
+      ]
+    },
+    {
+      "title": "Target and output lamp",
+      "explanation": "Place a dirt block in front of the observer (east). Place a redstone lamp behind the observer (west). When you break or place the dirt, the lamp flashes for 1 tick. Observers don't hold signal — they only emit a momentary pulse on change.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:observer[facing=east,powered=false]"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:dirt"},
+        {"x":-1,"y":0,"z":0,"block":"minecraft:redstone_lamp"}
+      ]
+    }
+  ]
+}

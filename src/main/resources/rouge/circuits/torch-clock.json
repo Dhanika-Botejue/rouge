@@ -1,0 +1,9 @@
+{
+  "id": "torch-clock",
+  "title": "Torch Clock (3-Torch)",
+  "category": "timing",
+  "description": "Fastest repeating clock in Minecraft. Three redstone torches in a triangle — each torch's output powers the next torch's base, turning it off and creating a looping pulse. Runs at roughly 3 ticks per cycle (1.5 game ticks). Unstable on some hardware; use a hopper clock for precision.",
+  "inputs": [],
+  "outputs": ["clock_signal"],
+  "footprint": "2x2x2"
+}

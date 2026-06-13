@@ -1,0 +1,26 @@
+{
+  "id": "redstone-lamp",
+  "title": "Redstone Lamp Toggle",
+  "category": "output",
+  "description": "A redstone lamp lit by a lever — the simplest controllable light. The lamp turns on the instant it receives any power (signal strength 1-15) and turns off when power is removed.",
+  "aliases": ["lamp", "light", "lever light", "redstone light"],
+  "footprint": "2x2x1",
+  "steps": [
+    {
+      "title": "Place the lamp",
+      "explanation": "Set down a redstone lamp. On its own it stays dark — it needs a power source touching it.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:redstone_lamp"}
+      ]
+    },
+    {
+      "title": "Add a lever",
+      "explanation": "Put a block beside the lamp and a lever on top. A lever next to (or on) the lamp powers it directly — no dust needed. Flip it and the lamp lights up.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:redstone_lamp"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:lever[face=floor,facing=south,powered=false]"}
+      ]
+    }
+  ]
+}

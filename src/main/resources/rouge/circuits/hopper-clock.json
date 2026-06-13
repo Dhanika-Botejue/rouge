@@ -1,0 +1,9 @@
+{
+  "id": "hopper-clock",
+  "title": "Hopper Clock",
+  "category": "timing",
+  "description": "Two hoppers facing each other, passing items back and forth. Each hopper's comparator output pulses when items arrive. Period is adjustable by changing the item count — more items = slower clock. Far more stable than torch clocks and survives chunk reload.",
+  "inputs": [],
+  "outputs": ["clock_signal"],
+  "footprint": "3x3x1"
+}

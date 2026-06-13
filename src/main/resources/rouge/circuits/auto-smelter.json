@@ -1,0 +1,8 @@
+{
+  "id": "auto-smelter",
+  "title": "Automatic Smelter",
+  "category": "storage",
+  "description": "A furnace array that loads ore, fuel, and unloads output on its own. Single-furnace version: a furnace with three hoppers — one feeding the top (input/ore), one feeding the side (fuel), and one pulling from the bottom (output) into a chest. Place a chest above each input hopper so you can dump stacks in and walk away; the bottom hopper carries smelted items to a collection chest. For throughput, line up several furnaces sharing one long input hopper line on top and one long output hopper line underneath. Hoppers point in the direction of the block they feed — crouch-place onto the furnace to aim them.",
+  "aliases": ["auto smelter", "furnace array", "smelter", "auto furnace"],
+  "footprint": "3x4x2"
+}

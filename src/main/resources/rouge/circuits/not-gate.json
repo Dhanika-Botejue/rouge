@@ -1,0 +1,69 @@
+{
+  "id": "not-gate",
+  "title": "NOT Gate (Inverter)",
+  "category": "logic",
+  "description": "Output is ON when input is OFF, and OFF when input is ON. Core of all redstone logic — every complex circuit uses inversion.",
+  "inputs": ["input"],
+  "outputs": ["output"],
+  "footprint": "5x1x1",
+  "steps": [
+    {
+      "title": "Foundation",
+      "explanation": "3 stone blocks in a line. The leftmost holds the lever, middle carries signal, rightmost is the anchor block the torch attaches to.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"}
+      ]
+    },
+    {
+      "title": "Input lever",
+      "explanation": "Place the lever on top of the first stone. This is your signal source — flip it to test the gate.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:lever[face=floor,facing=south,powered=false]"}
+      ]
+    },
+    {
+      "title": "Signal wire",
+      "explanation": "Two dust tiles carry the lever's signal east. The dust at x=2 sits on top of the anchor block and strongly powers it — that strong power is what the torch detects.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:lever[face=floor,facing=south,powered=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":1,"z":0,"block":"minecraft:redstone_wire"}
+      ]
+    },
+    {
+      "title": "Inverter torch",
+      "explanation": "Place a wall torch on the east face of the anchor block (the block at x=2). When the dust above strongly powers that block, this torch turns OFF — output inverted.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:lever[face=floor,facing=south,powered=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":0,"z":0,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"}
+      ]
+    },
+    {
+      "title": "Output lamp",
+      "explanation": "Place a redstone lamp directly east of the torch. The lamp lights when the torch is ON (lever OFF) and goes dark when the lever is flipped — that is inversion in action.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":1,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":2,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:lever[face=floor,facing=south,powered=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":0,"z":0,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"},
+        {"x":4,"y":0,"z":0,"block":"minecraft:redstone_lamp"}
+      ]
+    }
+  ]
+}

@@ -4,12 +4,16 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -24,6 +28,8 @@ import java.util.concurrent.CompletableFuture;
  */
 public final class OpenRouterClient {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger("rouge");
+
     private final OpenRouterConfig config;
     private final HttpClient http;
 
@@ -35,54 +41,63 @@ public final class OpenRouterClient {
     }
 
     /**
-     * Sends the conversation to OpenRouter (text model) and resolves with the reply
-     * text. The returned future completes exceptionally (with a human-readable
-     * message) on missing token, non-200 status, or malformed response.
+     * Sends the conversation to OpenRouter. On any non-200 response (rate limit,
+     * no endpoint, unavailable) automatically tries the next model in the chain —
+     * first the user-set primary, then every free model discovered live from
+     * OpenRouter's API, then the hardcoded emergency fallbacks.
      */
     public CompletableFuture<String> complete(List<ChatMessage> history) {
         JsonArray messages = new JsonArray();
         for (ChatMessage m : history) {
             messages.add(textMessage(m.role(), m.content()));
         }
-        return send(config.model(), messages, Duration.ofSeconds(30));
+        // Kick off model discovery in background if not done yet.
+        ModelDiscovery.getFreeModels(config.token(), http);
+        return sendWithFallback(messages, 0);
     }
 
-    /**
-     * Sends a single multimodal turn (text + optional PNG) to the configured vision
-     * model and resolves with the reply text. Used to compile a sketch into a build.
-     *
-     * @param systemPrompt system instructions (may be null/empty)
-     * @param userText     the structured prompt text
-     * @param pngBase64    base64 PNG (no data-URL prefix); may be null to skip the image
-     */
-    public CompletableFuture<String> completeVision(String systemPrompt, String userText, String pngBase64) {
-        JsonArray messages = new JsonArray();
-        if (systemPrompt != null && !systemPrompt.isEmpty()) {
-            messages.add(textMessage("system", systemPrompt));
+    private CompletableFuture<String> sendWithFallback(JsonArray messages, int attempt) {
+        List<String> chain = buildChain();
+        if (attempt >= chain.size()) {
+            return CompletableFuture.failedFuture(new RuntimeException(
+                    "No available models found. Check openrouter.ai/models and use /rouge model <id>."));
         }
-
-        JsonArray content = new JsonArray();
-        JsonObject textPart = new JsonObject();
-        textPart.addProperty("type", "text");
-        textPart.addProperty("text", userText);
-        content.add(textPart);
-        if (pngBase64 != null && !pngBase64.isEmpty()) {
-            JsonObject imageUrl = new JsonObject();
-            imageUrl.addProperty("url", "data:image/png;base64," + pngBase64);
-            JsonObject imagePart = new JsonObject();
-            imagePart.addProperty("type", "image_url");
-            imagePart.add("image_url", imageUrl);
-            content.add(imagePart);
-        }
-        JsonObject userMessage = new JsonObject();
-        userMessage.addProperty("role", "user");
-        userMessage.add("content", content);
-        messages.add(userMessage);
-
-        return send(config.visionModel(), messages, Duration.ofSeconds(60));
+        String model = chain.get(attempt);
+        return sendRaw(model, messages, Duration.ofSeconds(30))
+                .thenCompose(response -> {
+                    int status = response.statusCode();
+                    if (status != 200) {
+                        // Any failure — no endpoint, rate limit, unavailable — try next.
+                        LOGGER.debug("[Rouge] Model {} returned HTTP {}; trying next.", model, status);
+                        return sendWithFallback(messages, attempt + 1);
+                    }
+                    try {
+                        return CompletableFuture.completedFuture(parseReply(response));
+                    } catch (RuntimeException e) {
+                        // Empty/bad response from this model — try next.
+                        LOGGER.debug("[Rouge] Model {} bad reply ({}); trying next.", model, e.getMessage());
+                        return sendWithFallback(messages, attempt + 1);
+                    }
+                });
     }
 
-    private CompletableFuture<String> send(String model, JsonArray messages, Duration timeout) {
+    private List<String> buildChain() {
+        List<String> chain = new ArrayList<>();
+        // 1. User-set primary.
+        chain.add(config.model());
+        // 2. Live-discovered free models (populated after first complete() call).
+        List<String> discovered = ModelDiscovery.getFreeModels(config.token(), http);
+        for (String id : discovered) {
+            if (!chain.contains(id)) chain.add(id);
+        }
+        // 3. Hardcoded emergency fallbacks (in case discovery hasn't finished yet).
+        for (String id : OpenRouterConfig.FALLBACKS) {
+            if (!chain.contains(id)) chain.add(id);
+        }
+        return chain;
+    }
+
+    private CompletableFuture<HttpResponse<String>> sendRaw(String model, JsonArray messages, Duration timeout) {
         if (!config.hasToken()) {
             return CompletableFuture.failedFuture(new IllegalStateException(
                     "No OpenRouter API key. Set the " + OpenRouterConfig.TOKEN_ENV_VAR + " environment variable."));
@@ -91,6 +106,7 @@ public final class OpenRouterClient {
         JsonObject body = new JsonObject();
         body.addProperty("model", model);
         body.add("messages", messages);
+        body.addProperty("max_tokens", 2048);
 
         HttpRequest request;
         try {
@@ -108,8 +124,7 @@ public final class OpenRouterClient {
             return CompletableFuture.failedFuture(e);
         }
 
-        return http.sendAsync(request, BodyHandlers.ofString())
-                .thenApply(this::parseReply);
+        return http.sendAsync(request, BodyHandlers.ofString());
     }
 
     private JsonObject textMessage(String role, String content) {
@@ -132,13 +147,27 @@ public final class OpenRouterClient {
             JsonObject root = JsonParser.parseString(raw).getAsJsonObject();
             JsonArray choices = root.getAsJsonArray("choices");
             if (choices == null || choices.isEmpty()) {
-                throw new RuntimeException("OpenRouter returned no choices.");
+                throw new RuntimeException("OpenRouter returned no choices — the model may be overloaded. Try again.");
             }
-            JsonObject message = choices.get(0).getAsJsonObject().getAsJsonObject("message");
+            JsonObject choice = choices.get(0).getAsJsonObject();
+            String finishReason = choice.has("finish_reason") && !choice.get("finish_reason").isJsonNull()
+                    ? choice.get("finish_reason").getAsString() : "unknown";
+
+            JsonObject message = choice.getAsJsonObject("message");
             if (message == null || !message.has("content") || message.get("content").isJsonNull()) {
-                throw new RuntimeException("OpenRouter reply had no content.");
+                // content_filter or tool-call-only response — give a useful hint
+                String hint = switch (finishReason) {
+                    case "content_filter" -> "The model's content filter blocked the response. Try rephrasing.";
+                    case "tool_calls"     -> "The model responded with tool calls instead of text. Try a different model.";
+                    default -> "The model returned an empty response (finish_reason=" + finishReason + "). Try again.";
+                };
+                throw new RuntimeException(hint);
             }
-            return message.get("content").getAsString().trim();
+            String content = message.get("content").getAsString().trim();
+            if (content.isEmpty()) {
+                throw new RuntimeException("The model returned a blank response (finish_reason=" + finishReason + "). Try again.");
+            }
+            return content;
         } catch (RuntimeException e) {
             throw e;
         } catch (Exception e) {

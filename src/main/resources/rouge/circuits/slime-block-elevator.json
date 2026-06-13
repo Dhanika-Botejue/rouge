@@ -1,0 +1,8 @@
+{
+  "id": "slime-block-elevator",
+  "title": "Slime Block Flying Elevator",
+  "category": "transport",
+  "description": "A piston-driven platform that carries the player vertically — a redstone elevator. A column of sticky pistons climbs a wall, each pushing a slime-block platform up one block in sequence; an upward chain of observers or a piston-feed tape times them so the platform rises smoothly. Simpler honey/slime variant: stand on a slime platform, a vertical observer ladder fires pistons in order so the platform 'walks' up the shaft, reversing to descend. This is essentially a vertical flying machine. It needs slime blocks for the platform, sticky pistons, observers for timing, and a guide column so it tracks straight up and down.",
+  "aliases": ["slime elevator", "piston elevator", "flying elevator", "redstone elevator"],
+  "footprint": "2x10x2"
+}

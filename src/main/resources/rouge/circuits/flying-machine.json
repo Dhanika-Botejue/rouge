@@ -1,0 +1,8 @@
+{
+  "id": "flying-machine",
+  "title": "Observer Flying Machine",
+  "category": "transport",
+  "description": "A self-propelled slime/honey block engine that flies in a straight line. Core idea: two observers face each other across a slime block; each observer's pulse pushes a sticky piston that drags the whole machine one block forward, then the other observer fires and repeats — endless motion. Minimal build: a slime block with an observer on each end (facing into the slime), a sticky piston behind each observer pointed in the travel direction, and one extra honey or slime block tying the pistons to the structure so the engine stays together. Slime sticks to most blocks; honey does NOT stick to slime, which is how builders make the machine drop cargo. Start it by placing a single redstone block on the engine to trigger the first observer, then mine the redstone block. Direction of travel is set by which way the pistons face.",
+  "aliases": ["flying machine", "slime flying machine", "slimestone engine", "self propelled machine"],
+  "footprint": "4x2x2"
+}

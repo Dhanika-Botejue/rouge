@@ -1,0 +1,8 @@
+{
+  "id": "piston-door-3x3",
+  "title": "3x3 Piston Door",
+  "category": "door",
+  "description": "A 3x3 flush door using double piston extenders so the corner blocks can clear a 3-wide opening. Each of the four corners is driven by a double extender (a sticky piston pushing another sticky piston) so the corner block travels two spaces out of the doorway; the center edges use single sticky pistons. All extenders must fire in the correct order, so the control circuit chains observers or repeater delays: the outer (rear) pistons fire first, the inner (front) pistons a tick later. A lever or button on each side feeds a shared redstone line behind the wall. This is an advanced build — keep the two sides mirrored and give yourself at least 2 blocks of wall depth for the extender mechanism.",
+  "aliases": ["3x3 door", "big piston door", "jeb door", "vault door"],
+  "footprint": "5x5x4"
+}

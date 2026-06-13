@@ -1,0 +1,85 @@
+{
+  "id": "rs-latch",
+  "title": "RS NOR Latch",
+  "category": "memory",
+  "description": "Two-input memory cell. S (set) input latches output Q ON; R (reset) input latches Q OFF. Output holds its state when both inputs are released. The simplest form of 1-bit memory in Minecraft.",
+  "inputs": ["set", "reset"],
+  "outputs": ["q", "not_q"],
+  "footprint": "4x2x3",
+  "steps": [
+    {
+      "title": "Foundation",
+      "explanation": "A 4x3 stone base. The two NOR torches will go at x=1 and x=2; S and R inputs approach from the z=0 and z=2 sides.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},{"x":1,"y":0,"z":0,"block":"minecraft:stone"},{"x":2,"y":0,"z":0,"block":"minecraft:stone"},{"x":3,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":1,"y":0,"z":1,"block":"minecraft:stone"},{"x":2,"y":0,"z":1,"block":"minecraft:stone"},{"x":3,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},{"x":1,"y":0,"z":2,"block":"minecraft:stone"},{"x":2,"y":0,"z":2,"block":"minecraft:stone"},{"x":3,"y":0,"z":2,"block":"minecraft:stone"}
+      ]
+    },
+    {
+      "title": "Set and Reset inputs",
+      "explanation": "Button S at (0,1,0) and button R at (0,1,2). Buttons give a short pulse — perfect for a latch because the latch holds state after the button is released.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},{"x":1,"y":0,"z":0,"block":"minecraft:stone"},{"x":2,"y":0,"z":0,"block":"minecraft:stone"},{"x":3,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":1,"y":0,"z":1,"block":"minecraft:stone"},{"x":2,"y":0,"z":1,"block":"minecraft:stone"},{"x":3,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},{"x":1,"y":0,"z":2,"block":"minecraft:stone"},{"x":2,"y":0,"z":2,"block":"minecraft:stone"},{"x":3,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:stone_button[face=floor,facing=south,powered=false]"},
+        {"x":0,"y":1,"z":2,"block":"minecraft:stone_button[face=floor,facing=north,powered=false]"}
+      ]
+    },
+    {
+      "title": "S-side NOR torch (Torch_S)",
+      "explanation": "Dust from S button feeds x=1,z=0. A wall torch on the east face at (2,0,0) is Torch_S. It outputs Q: ON when not powered. Later, feedback from Torch_R will also suppress it.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},{"x":1,"y":0,"z":0,"block":"minecraft:stone"},{"x":2,"y":0,"z":0,"block":"minecraft:stone"},{"x":3,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":1,"y":0,"z":1,"block":"minecraft:stone"},{"x":2,"y":0,"z":1,"block":"minecraft:stone"},{"x":3,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},{"x":1,"y":0,"z":2,"block":"minecraft:stone"},{"x":2,"y":0,"z":2,"block":"minecraft:stone"},{"x":3,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:stone_button[face=floor,facing=south,powered=false]"},
+        {"x":0,"y":1,"z":2,"block":"minecraft:stone_button[face=floor,facing=north,powered=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":0,"z":0,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"}
+      ]
+    },
+    {
+      "title": "R-side NOR torch (Torch_R)",
+      "explanation": "Mirror of the S side along z=2. Torch_R outputs NOT_Q: ON when R has not been pressed. Both torches are now lit — the latch is in its default unset state.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},{"x":1,"y":0,"z":0,"block":"minecraft:stone"},{"x":2,"y":0,"z":0,"block":"minecraft:stone"},{"x":3,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":1,"y":0,"z":1,"block":"minecraft:stone"},{"x":2,"y":0,"z":1,"block":"minecraft:stone"},{"x":3,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},{"x":1,"y":0,"z":2,"block":"minecraft:stone"},{"x":2,"y":0,"z":2,"block":"minecraft:stone"},{"x":3,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:stone_button[face=floor,facing=south,powered=false]"},
+        {"x":0,"y":1,"z":2,"block":"minecraft:stone_button[face=floor,facing=north,powered=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":0,"z":0,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"},
+        {"x":1,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":0,"z":2,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"}
+      ]
+    },
+    {
+      "title": "Cross-coupling feedback",
+      "explanation": "This is the memory: run dust from Torch_S's output (east at x=3,z=0) south to z=1, then west to x=1,z=2 (the anchor block for Torch_R). Do the mirror for Torch_R. Now each torch's output suppresses the other — exactly one torch can be ON at a time.",
+      "blocks": [
+        {"x":0,"y":0,"z":0,"block":"minecraft:stone"},{"x":1,"y":0,"z":0,"block":"minecraft:stone"},{"x":2,"y":0,"z":0,"block":"minecraft:stone"},{"x":3,"y":0,"z":0,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":1,"block":"minecraft:stone"},{"x":1,"y":0,"z":1,"block":"minecraft:stone"},{"x":2,"y":0,"z":1,"block":"minecraft:stone"},{"x":3,"y":0,"z":1,"block":"minecraft:stone"},
+        {"x":0,"y":0,"z":2,"block":"minecraft:stone"},{"x":1,"y":0,"z":2,"block":"minecraft:stone"},{"x":2,"y":0,"z":2,"block":"minecraft:stone"},{"x":3,"y":0,"z":2,"block":"minecraft:stone"},
+        {"x":0,"y":1,"z":0,"block":"minecraft:stone_button[face=floor,facing=south,powered=false]"},
+        {"x":0,"y":1,"z":2,"block":"minecraft:stone_button[face=floor,facing=north,powered=false]"},
+        {"x":1,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":0,"z":0,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"},
+        {"x":1,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":0,"z":2,"block":"minecraft:redstone_wall_torch[facing=east,lit=true]"},
+        {"x":4,"y":1,"z":0,"block":"minecraft:redstone_wire"},
+        {"x":4,"y":1,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":4,"y":1,"z":2,"block":"minecraft:redstone_wire"},
+        {"x":1,"y":1,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":2,"y":1,"z":1,"block":"minecraft:redstone_wire"},
+        {"x":3,"y":1,"z":1,"block":"minecraft:redstone_wire"}
+      ]
+    }
+  ]
+}

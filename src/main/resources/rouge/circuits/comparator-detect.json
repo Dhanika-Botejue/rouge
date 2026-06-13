@@ -1,0 +1,9 @@
+{
+  "id": "comparator-detect",
+  "title": "Comparator Item Detector",
+  "category": "signal",
+  "description": "A comparator reads the fullness of a chest, hopper, or furnace and outputs a signal strength proportional to fill level (0 = empty, 15 = full). Used in item sorters, auto-crafters, and storage indicators. The comparator must face away from the container.",
+  "inputs": ["container_fill"],
+  "outputs": ["fill_signal"],
+  "footprint": "3x2x1"
+}

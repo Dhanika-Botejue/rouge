@@ -1,0 +1,8 @@
+{
+  "id": "tnt-cannon",
+  "title": "TNT Cannon",
+  "category": "tnt",
+  "description": "Launches primed TNT across long distances using water to absorb the blast. Build a trough lined with a solid material, place a water source at the closed (back) end so the floor TNT won't destroy the cannon, then lay several 'charge' TNT along the trough floor and one 'projectile' TNT on top at the front. Firing order is everything: the charges detonate a tick or two before the projectile so their blast knocks the projectile forward instead of straight up. A repeater chain (each repeater set to a small delay) wired from a single button creates that staggered ignition. More charge TNT = more range. Point the open front of the trough at your target.",
+  "aliases": ["tnt cannon", "cannon", "tnt launcher"],
+  "footprint": "8x2x2"
+}
