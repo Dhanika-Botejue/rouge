@@ -3,6 +3,7 @@ package dev.dhanika.rouge.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import dev.dhanika.rouge.build.BlockEntry;
+import dev.dhanika.rouge.build.BuildSpec;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -25,21 +26,27 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Draws the current build step as a ghost preview floating in the world: every block of
- * the build so far is shown as its real block model, and the blocks added <i>this step</i>
- * get a bright glowing outline so the player knows exactly what to place next.
+ * Draws the current build step as a ghost preview floating in the world. Every block of the
+ * build-so-far is rendered as its real block model but <b>semi-transparent</b>, so a ghost
+ * block is instantly distinguishable from a solid block the player has actually placed. The
+ * blocks added <i>this step</i> also get a bright green outline so the player knows exactly
+ * what to place next; earlier blocks get a faint blue outline.
  *
- * <p>This is a fully self-contained replacement for the old Litematica bridge — it renders
- * through Fabric's {@link WorldRenderContext} and needs no external mod. Everything is
- * guarded so a single bad block id or a renderer hiccup never crashes the frame.
+ * <p>Self-contained: it renders through Fabric's {@link WorldRenderContext} and needs no
+ * external mod. Transparency is automatic — block colours are forced to a fixed low alpha and
+ * drawn on the translucent layer. Everything is guarded so a single bad block id or a renderer
+ * hiccup never crashes the frame.
  */
 public final class GhostRenderer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("rouge");
 
+    /** Alpha applied to every ghost block (0–255). Low enough to clearly read as "not placed yet". */
+    private static final int GHOST_ALPHA = 110;
+
     // Outline colours (r, g, b, a).
     private static final float[] NEW_COLOR = {0.30f, 1.00f, 0.45f, 0.95f}; // bright green — place these now
-    private static final float[] OLD_COLOR = {0.55f, 0.70f, 1.00f, 0.35f}; // faint blue — already placed
+    private static final float[] OLD_COLOR = {0.55f, 0.70f, 1.00f, 0.35f}; // faint blue — already shown
 
     private static volatile List<Ghost> ghosts = List.of();
     private static volatile boolean active = false;
@@ -49,10 +56,19 @@ public final class GhostRenderer {
     /** A single block to render, already resolved to world coordinates and a block state. */
     private record Ghost(BlockPos pos, BlockState state, boolean isNew) {}
 
+    /** Converts difficulty-filtered {@link BuildSpec.BlockEntry} list to render entries (drops role). */
+    public static List<BlockEntry> fromSpec(List<BuildSpec.BlockEntry> blocks) {
+        List<BlockEntry> out = new ArrayList<>(blocks.size());
+        for (BuildSpec.BlockEntry b : blocks) {
+            out.add(new BlockEntry(b.x(), b.y(), b.z(), b.block()));
+        }
+        return out;
+    }
+
     /**
-     * Shows the build at {@code anchor}. {@code all} is every block placed up to and
-     * including the current step (in build-local coordinates); {@code added} is just the
-     * blocks introduced this step, which get the bright highlight.
+     * Shows the build at {@code anchor}. {@code all} is every block to render (in build-local
+     * coordinates); {@code added} is just the blocks introduced this step, which get the bright
+     * highlight.
      */
     public static void show(BlockPos anchor, List<BlockEntry> all, List<BlockEntry> added) {
         Set<Long> newKeys = new HashSet<>();
@@ -92,11 +108,14 @@ public final class GhostRenderer {
             MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
             BlockRenderDispatcher dispatcher = mc.getBlockRenderer();
 
-            // 1. Real block models, full-bright so the preview reads clearly day or night.
+            // 1. Real block models, drawn semi-transparent so the preview is obviously a ghost.
+            //    We force every vertex's alpha and route the model onto the translucent layer.
+            VertexConsumer translucent = new GhostAlpha(buffers.getBuffer(RenderType.translucent()), GHOST_ALPHA);
+            MultiBufferSource ghostSource = renderType -> translucent;
             for (Ghost g : snapshot) {
                 pose.pushPose();
                 pose.translate(g.pos.getX() - cam.x, g.pos.getY() - cam.y, g.pos.getZ() - cam.z);
-                dispatcher.renderSingleBlock(g.state, pose, buffers,
+                dispatcher.renderSingleBlock(g.state, pose, ghostSource,
                         LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
                 pose.popPose();
             }
@@ -124,6 +143,64 @@ public final class GhostRenderer {
         } catch (Exception e) {
             LOGGER.warn("[Rouge] Skipping unparseable block '{}': {}", blockId, e.getMessage());
             return null;
+        }
+    }
+
+    /**
+     * Wraps a block-layer {@link VertexConsumer} and forces a fixed alpha on every vertex
+     * colour, turning an otherwise-opaque block model into a translucent ghost. All other
+     * vertex attributes pass through unchanged.
+     */
+    private record GhostAlpha(VertexConsumer delegate, int alpha) implements VertexConsumer {
+        @Override
+        public VertexConsumer vertex(double x, double y, double z) {
+            delegate.vertex(x, y, z);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer color(int r, int g, int b, int a) {
+            delegate.color(r, g, b, alpha);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer uv(float u, float v) {
+            delegate.uv(u, v);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer overlayCoords(int u, int v) {
+            delegate.overlayCoords(u, v);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer uv2(int u, int v) {
+            delegate.uv2(u, v);
+            return this;
+        }
+
+        @Override
+        public VertexConsumer normal(float x, float y, float z) {
+            delegate.normal(x, y, z);
+            return this;
+        }
+
+        @Override
+        public void endVertex() {
+            delegate.endVertex();
+        }
+
+        @Override
+        public void defaultColor(int r, int g, int b, int a) {
+            delegate.defaultColor(r, g, b, a);
+        }
+
+        @Override
+        public void unsetDefaultColor() {
+            delegate.unsetDefaultColor();
         }
     }
 }

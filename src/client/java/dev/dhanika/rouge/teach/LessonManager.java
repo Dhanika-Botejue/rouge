@@ -7,33 +7,34 @@ import dev.dhanika.rouge.build.BuildSpec;
 import dev.dhanika.rouge.build.BuildSpec.BlockEntry;
 import dev.dhanika.rouge.build.Difficulty;
 import dev.dhanika.rouge.build.Difficulty.Level;
-import dev.dhanika.rouge.build.LitematicWriter;
 import dev.dhanika.rouge.build.WorldPlacer;
 import dev.dhanika.rouge.chat.ChatDisplay;
-import net.minecraft.client.Minecraft;
+import dev.dhanika.rouge.render.GhostRenderer;
 import net.minecraft.core.BlockPos;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.List;
 
 /**
- * Single source of truth for the active lesson: the full solution, the world
- * anchor it lines up to, and the current difficulty. Orchestrates the user-facing
- * actions ({@code /rouge load}, {@code /rouge solution}, {@code /rouge level}).
+ * Single source of truth for the active lesson: the full solution, the world anchor it lines
+ * up to, and the current difficulty. Holds the state that {@link BuildDiff}, {@link
+ * ProactiveTutor}, and the {@code /rouge solution|check|level} actions read.
  * <p>
- * All methods are called on the main client thread; {@link WorldPlacer} handles the
- * hop to the server thread internally.
+ * The build is shown as a translucent in-world hologram via {@link GhostRenderer}; difficulty
+ * controls how much of it is shown (easy shows everything, medium/hard hide a fraction the
+ * learner must figure out and place themselves). Step-by-step builds are driven by {@link
+ * StepSession}, which renders each step and registers it here as the diff target via
+ * {@link #setActive}.
+ * <p>
+ * All methods are called on the main client thread; {@link WorldPlacer} handles the hop to the
+ * server thread internally.
  */
 public final class LessonManager {
 
-    /** File name written into the Litematica {@code schematics} folder. */
-    public static final String OVERLAY_NAME = "rouge_lesson";
-
     private static BuildSpec solution;
     private static BlockPos anchor;
-    private static Level level = Level.BASIC;
+    private static Level level = Level.EASY;
 
     private LessonManager() {
     }
@@ -50,7 +51,7 @@ public final class LessonManager {
         return level;
     }
 
-    /** Loads the bundled sample circuit as the active lesson and writes its overlay. */
+    /** Loads the bundled sample circuit as the active lesson and shows its hologram. */
     public static void loadSample() {
         BuildSpec spec;
         try {
@@ -61,22 +62,44 @@ public final class LessonManager {
         }
         setLesson(spec);
         ChatDisplay.system("Loaded a sample lesson (" + spec.blocks().size() + " blocks). "
-                + "Overlay written — open Litematica (M) → Load Schematics → " + OVERLAY_NAME + ".");
-        ChatDisplay.system("Then: /rouge solution to build it, or /rouge level easy|medium|hard to practice.");
+                + "A translucent hologram is floating in front of you — build solid blocks to match it.");
+        ChatDisplay.system("Then: /rouge solution to reveal it, /rouge check for progress, "
+                + "or /rouge level easy|medium|hard to practice.");
     }
 
-    /** Installs a freshly compiled/loaded solution as the active lesson (basic level). */
+    /** Installs a freshly loaded solution as the active lesson (easy level) and shows it. */
     public static void setLesson(BuildSpec spec) {
-        setLesson(spec, Level.BASIC);
+        setLesson(spec, Level.EASY);
     }
 
-    /** Installs a solution at a chosen difficulty and writes the overlay once. */
+    /** Installs a solution at a chosen difficulty, anchored in front of the player, and shows it. */
     public static void setLesson(BuildSpec spec, Level startLevel) {
         solution = spec;
         anchor = WorldPlacer.defaultAnchor();
         level = startLevel;
         ProactiveTutor.reset();
-        writeOverlay();
+        renderSolution();
+    }
+
+    /**
+     * Registers the current step of a step-by-step build as the active lesson (the diff target
+     * for {@link ProactiveTutor}/{@code /rouge check}), pinned to a caller-supplied {@code
+     * stepAnchor} so the build keeps a single stable origin as steps advance. Does <b>not</b>
+     * render — {@link StepSession} draws the step (with its new-block highlight) itself.
+     */
+    public static void setActive(BuildSpec stepSolution, BlockPos stepAnchor, Level activeLevel) {
+        solution = stepSolution;
+        anchor = stepAnchor;
+        level = activeLevel;
+        ProactiveTutor.reset();
+    }
+
+    /** Clears the active lesson and the hologram. */
+    public static void clearLesson() {
+        solution = null;
+        anchor = null;
+        GhostRenderer.clear();
+        ProactiveTutor.reset();
     }
 
     /**
@@ -123,11 +146,11 @@ public final class LessonManager {
     /** Reports the learner's progress against the solution (local diff, no API). */
     public static void check() {
         if (solution == null) {
-            ChatDisplay.error("No lesson loaded. Use /rouge load first.");
+            ChatDisplay.error("No active build. Ask Rouge to teach you something, or /rouge load a sample.");
             return;
         }
         if (anchor == null) {
-            ChatDisplay.error("No build anchor yet — load a lesson first.");
+            ChatDisplay.error("No build anchor yet — start a build first.");
             return;
         }
         Report report = BuildDiff.compute(solution, anchor);
@@ -146,59 +169,58 @@ public final class LessonManager {
         }
     }
 
-    /** Switches difficulty and rewrites the overlay locally (no AI call). */
+    /**
+     * Switches difficulty and refreshes the hologram (no AI call). During a step-by-step build
+     * this re-renders the current step at the new level; for a standalone lesson it re-renders
+     * the whole solution.
+     */
     public static void setLevel(Level newLevel) {
         if (solution == null) {
-            ChatDisplay.error("No lesson loaded. Use /rouge load first.");
+            ChatDisplay.error("No active build. Ask Rouge to teach you something, or /rouge load a sample.");
             return;
         }
         level = newLevel;
-        writeOverlay();
-        int shown = Difficulty.shown(solution, level).size();
+        if (StepSession.isActive()) {
+            StepSession.refresh();
+        } else {
+            renderSolution();
+        }
+        int shownCount = Difficulty.shown(solution, level).size();
         int total = solution.blocks().size();
-        ChatDisplay.system("Level " + level.lower() + ": overlay shows " + shown + " of " + total
-                + " blocks — build the rest yourself. Reload it in Litematica (M → Load).");
+        ChatDisplay.system("Level " + level.lower() + ": hologram shows " + shownCount + " of " + total
+                + " blocks — build the rest yourself.");
     }
 
     /** Places the full solution into the world (the answer key). */
     public static void placeSolution() {
         if (solution == null) {
-            ChatDisplay.error("No lesson loaded. Use /rouge load first.");
+            ChatDisplay.error("No active build. Ask Rouge to teach you something, or /rouge load a sample.");
             return;
         }
         if (anchor == null) {
             anchor = WorldPlacer.defaultAnchor();
         }
         if (!WorldPlacer.isAvailable()) {
-            ChatDisplay.error("Can only place blocks in singleplayer. The overlay still works on servers.");
+            ChatDisplay.error("Can only place blocks in singleplayer.");
             return;
         }
         WorldPlacer.place(solution.blocks(), anchor);
         ChatDisplay.system("Built the full solution in front of you.");
     }
 
-    /** Writes the overlay {@code .litematic} for the current level. (M2 narrows the subset.) */
-    private static void writeOverlay() {
-        if (solution == null) {
+    /** Renders the difficulty-filtered solution as a translucent hologram (all shown blocks highlighted). */
+    private static void renderSolution() {
+        if (solution == null || anchor == null) {
             return;
         }
-        List<BlockEntry> shown = Difficulty.shown(solution, level);
-        try {
-            Path file = schematicsDir().resolve(OVERLAY_NAME + ".litematic");
-            LitematicWriter.write(OVERLAY_NAME, shown,
-                    solution.sizeX(), solution.sizeY(), solution.sizeZ(), file);
-        } catch (Exception e) {
-            ChatDisplay.error("Failed to write the overlay: " + e.getMessage());
-        }
+        List<BuildSpec.BlockEntry> shown = Difficulty.shown(solution, level);
+        var entries = GhostRenderer.fromSpec(shown);
+        GhostRenderer.show(anchor, entries, entries);
     }
 
     private static String shortName(String id) {
         String s = id.startsWith("minecraft:") ? id.substring("minecraft:".length()) : id;
         return s.replace('_', ' ');
-    }
-
-    private static Path schematicsDir() {
-        return Minecraft.getInstance().gameDirectory.toPath().resolve("schematics");
     }
 
     private static BuildSpec loadSampleResource() throws Exception {

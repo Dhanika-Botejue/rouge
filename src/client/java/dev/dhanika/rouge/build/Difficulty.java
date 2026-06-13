@@ -11,19 +11,19 @@ import java.util.List;
  * Decides which blocks of a solution are shown in the overlay vs. left for the
  * learner to place, based on difficulty.
  * <p>
- * Each level removes a fixed fraction of blocks: basic 0%, easy 20%, medium 50%,
- * hard 80%. Removal is <b>biased to hide wiring/logic before inputs and outputs</b>
- * (so the visible scaffold stays meaningful) and is <b>deterministic per circuit</b>
- * (a stable per-coordinate hash breaks ties), so a level looks the same each time.
+ * Each level removes a fixed fraction of blocks: easy 0% (shows everything),
+ * medium 30%, hard 50%. Removal is <b>biased to hide wiring/logic before inputs and
+ * outputs</b> (so the visible scaffold stays meaningful) and is <b>deterministic per
+ * circuit</b> (a stable per-coordinate hash breaks ties), so a level looks the same
+ * each time. Hidden blocks are still part of the build — the learner must place them.
  */
 public final class Difficulty {
 
     /** Difficulty levels and the fraction of blocks each removes from the overlay. */
     public enum Level {
-        BASIC(0.0),
-        EASY(0.2),
-        MEDIUM(0.5),
-        HARD(0.8);
+        EASY(0.0),
+        MEDIUM(0.3),
+        HARD(0.5);
 
         public final double removeFraction;
 
@@ -35,15 +35,15 @@ public final class Difficulty {
             return name().toLowerCase();
         }
 
-        /** Parses a level name; null/unknown → BASIC. */
+        /** Parses a level name; null/unknown → EASY. */
         public static Level of(String name) {
             if (name == null) {
-                return BASIC;
+                return EASY;
             }
             try {
                 return Level.valueOf(name.trim().toUpperCase());
             } catch (IllegalArgumentException e) {
-                return BASIC;
+                return EASY;
             }
         }
     }

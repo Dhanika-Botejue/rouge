@@ -9,8 +9,8 @@ import java.util.List;
 
 /**
  * A complete 3D build: its bounding size plus every block to place. This is the
- * single contract that both producers (the sketch canvas + the AI compiler) emit
- * and both consumers (the Litematica writer + the world placer) read.
+ * single contract that producers (AI build directives, bundled samples) emit and
+ * consumers (the ghost renderer, the world placer, the local diff) read.
  * <p>
  * Each {@link BlockEntry} carries a {@code role} (input/output/component/wire/
  * delay/support) so {@link Difficulty} can decide what to hide without re-guessing.

@@ -16,6 +16,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 /**
  * Async client for the OpenRouter chat completions API.
@@ -52,79 +53,69 @@ public final class OpenRouterClient {
         ModelDiscovery.getFreeModels(config.token(), http);
     }
 
+    /** {@link #complete(List, Consumer)} with no status callback. */
+    public CompletableFuture<String> complete(List<ChatMessage> history) {
+        return complete(history, status -> {});
+    }
+
     /**
      * Sends the conversation to OpenRouter. On any non-200 response (rate limit,
      * no endpoint, unavailable) automatically tries the next model in the chain —
      * first the user-set primary, then every free model discovered live from
      * OpenRouter's API, then the hardcoded emergency fallbacks.
+     * <p>
+     * {@code onStatus} is notified each time the client falls back to another model, with a
+     * human-readable line (the model that failed, why, and what's being tried next). The
+     * callback may run on an HTTP worker thread, so callers must hop to their own thread
+     * before touching game state.
      */
-    public CompletableFuture<String> complete(List<ChatMessage> history) {
+    public CompletableFuture<String> complete(List<ChatMessage> history, Consumer<String> onStatus) {
         JsonArray messages = new JsonArray();
         for (ChatMessage m : history) {
             messages.add(textMessage(m.role(), m.content()));
         }
         // Kick off model discovery in background if not done yet.
         ModelDiscovery.getFreeModels(config.token(), http);
-        return sendWithFallback(messages, 0);
+        return sendWithFallback(messages, 0, onStatus);
     }
 
-    /**
-     * Single-shot multimodal request used by canvas mode: sends a system prompt plus a
-     * user turn that carries both the structured sketch text and (optionally) a PNG, to
-     * the configured vision model. No model fallback chain — vision models differ in
-     * input shape, so we surface the error rather than silently retrying a text model.
-     */
-    public CompletableFuture<String> completeVision(String systemPrompt, String userText, String pngBase64) {
-        JsonArray messages = new JsonArray();
-        if (systemPrompt != null && !systemPrompt.isEmpty()) {
-            messages.add(textMessage("system", systemPrompt));
-        }
-
-        JsonArray content = new JsonArray();
-        JsonObject textPart = new JsonObject();
-        textPart.addProperty("type", "text");
-        textPart.addProperty("text", userText);
-        content.add(textPart);
-        if (pngBase64 != null && !pngBase64.isEmpty()) {
-            JsonObject imageUrl = new JsonObject();
-            imageUrl.addProperty("url", "data:image/png;base64," + pngBase64);
-            JsonObject imagePart = new JsonObject();
-            imagePart.addProperty("type", "image_url");
-            imagePart.add("image_url", imageUrl);
-            content.add(imagePart);
-        }
-        JsonObject userMessage = new JsonObject();
-        userMessage.addProperty("role", "user");
-        userMessage.add("content", content);
-        messages.add(userMessage);
-
-        return sendRaw(config.visionModel(), messages, Duration.ofSeconds(60))
-                .thenApply(this::parseReply);
-    }
-
-    private CompletableFuture<String> sendWithFallback(JsonArray messages, int attempt) {
+    private CompletableFuture<String> sendWithFallback(JsonArray messages, int attempt, Consumer<String> onStatus) {
         List<String> chain = buildChain();
         if (attempt >= chain.size()) {
             return CompletableFuture.failedFuture(new RuntimeException(
                     "No available models found. Check openrouter.ai/models and use /rouge model <id>."));
         }
         String model = chain.get(attempt);
+        String next = (attempt + 1 < chain.size()) ? chain.get(attempt + 1) : null;
         return sendRaw(model, messages, Duration.ofSeconds(30))
                 .thenCompose(response -> {
                     int status = response.statusCode();
                     if (status != 200) {
                         // Any failure — no endpoint, rate limit, unavailable — try next.
-                        LOGGER.debug("[Rouge] Model {} returned HTTP {}; trying next.", model, status);
-                        return sendWithFallback(messages, attempt + 1);
+                        notifyFallback(onStatus, model + " returned HTTP " + status, next);
+                        return sendWithFallback(messages, attempt + 1, onStatus);
                     }
                     try {
                         return CompletableFuture.completedFuture(parseReply(response));
                     } catch (RuntimeException e) {
                         // Empty/bad response from this model — try next.
-                        LOGGER.debug("[Rouge] Model {} bad reply ({}); trying next.", model, e.getMessage());
-                        return sendWithFallback(messages, attempt + 1);
+                        notifyFallback(onStatus, model + " gave a bad reply (" + e.getMessage() + ")", next);
+                        return sendWithFallback(messages, attempt + 1, onStatus);
                     }
                 });
+    }
+
+    /** Logs (at INFO so it's visible in the dev console) and reports a fallback to the caller. */
+    private void notifyFallback(Consumer<String> onStatus, String reason, String next) {
+        String line = next != null
+                ? reason + " — trying " + next + "…"
+                : reason + " — no more models to try.";
+        LOGGER.info("[Rouge] {}", line);
+        try {
+            onStatus.accept(line);
+        } catch (Exception ignored) {
+            // A misbehaving status sink must never break the request flow.
+        }
     }
 
     private List<String> buildChain() {

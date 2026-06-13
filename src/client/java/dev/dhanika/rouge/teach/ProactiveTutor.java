@@ -65,9 +65,14 @@ public final class ProactiveTutor {
             }
         }
 
-        // Congratulate once on completion.
+        // On completion: during a step-by-step build, auto-advance to the next step; for a
+        // standalone lesson, just congratulate once.
         boolean complete = report.isComplete() && report.correct() > 0;
         if (complete && !wasComplete) {
+            if (StepSession.isActive()) {
+                StepSession.onStepComplete(); // prints "Great job!" and advances; resets this tutor
+                return;                       // skip the wasComplete write — reset() already cleared it
+            }
             ChatDisplay.system("Nice — that matches the solution. ✔");
         }
         wasComplete = complete;

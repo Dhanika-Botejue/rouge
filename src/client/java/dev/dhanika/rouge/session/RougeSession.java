@@ -92,7 +92,9 @@ public final class RougeSession {
         history.clear();
         history.add(ChatMessage.system(SystemPrompts.redstoneTutor()));
         client.prewarm(); // discover free models + warm the TLS connection before the first ask
-        ChatDisplay.system("Session open. Ask me to teach you any redstone build — I'll show it step by step in-world. Type /rouge again to close.");
+        ChatDisplay.system("Session open. Ask me to teach you any redstone build — I'll show it step by step as a "
+                + "translucent hologram you build against, and move on as you go. Set difficulty with "
+                + "/rouge level easy|medium|hard. Type /rouge again to close.");
     }
 
     private static void close() {
@@ -115,6 +117,17 @@ public final class RougeSession {
         repairAttempts = 0;
         lastQuery = "";
         history.clear();
+    }
+
+    /**
+     * Called by {@link StepSession} when a build ends on its own (auto-advance finished the last
+     * step) or is stopped, so the session leaves BUILDING mode and treats the next message as
+     * normal chat rather than a step command.
+     */
+    public static void endBuildMode() {
+        if (open && mode == Mode.BUILDING) {
+            mode = Mode.CHAT;
+        }
     }
 
     public static void handleUserMessage(String text) {
@@ -223,8 +236,12 @@ public final class RougeSession {
         int from = Math.max(1, history.size() - MAX_HISTORY_MESSAGES);
         request.addAll(history.subList(from, history.size()));
 
-        client.complete(request).whenComplete((reply, err) ->
-                Minecraft.getInstance().execute(() -> onReply(reply, err)));
+        client.complete(request, status ->
+                        Minecraft.getInstance().execute(() -> {
+                            if (open) ChatDisplay.system(status);
+                        }))
+                .whenComplete((reply, err) ->
+                        Minecraft.getInstance().execute(() -> onReply(reply, err)));
     }
 
     private static void onReply(String reply, Throwable err) {

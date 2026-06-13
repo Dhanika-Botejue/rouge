@@ -2,11 +2,9 @@ package dev.dhanika.rouge;
 
 import dev.dhanika.rouge.ai.OpenRouterClient;
 import dev.dhanika.rouge.ai.OpenRouterConfig;
-import dev.dhanika.rouge.bridge.CanvasBridge;
 import dev.dhanika.rouge.chat.ChatInterceptor;
 import dev.dhanika.rouge.ai.ModelDiscovery;
 import dev.dhanika.rouge.command.RougeCommands;
-import dev.dhanika.rouge.compile.SketchCompiler;
 import dev.dhanika.rouge.render.GhostRenderer;
 import dev.dhanika.rouge.session.RougeSession;
 import dev.dhanika.rouge.teach.ProactiveTutor;
@@ -27,7 +25,6 @@ public class RougeClient implements ClientModInitializer {
         OpenRouterConfig config = new OpenRouterConfig();
         OpenRouterClient client = new OpenRouterClient(config);
         RougeSession.init(client, config);
-        CanvasBridge.init(new SketchCompiler(client));
 
         if (!config.hasToken()) {
             LOGGER.warn("[Rouge] No {} set — Rouge can open a session but can't reach the AI until you set it.",
@@ -43,7 +40,6 @@ public class RougeClient implements ClientModInitializer {
             RougeSession.reset();
             StepSession.reset();
             ModelDiscovery.invalidate();
-            CanvasBridge.stop();
         });
 
         LOGGER.info("Rouge initialized (model: {}).", config.model());

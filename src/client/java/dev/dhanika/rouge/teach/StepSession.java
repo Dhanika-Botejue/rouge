@@ -1,9 +1,13 @@
 package dev.dhanika.rouge.teach;
 
 import dev.dhanika.rouge.build.BlockEntry;
+import dev.dhanika.rouge.build.BuildSpec;
+import dev.dhanika.rouge.build.Difficulty;
+import dev.dhanika.rouge.build.Difficulty.Level;
 import dev.dhanika.rouge.build.StepPlan;
 import dev.dhanika.rouge.chat.ChatDisplay;
 import dev.dhanika.rouge.render.GhostRenderer;
+import dev.dhanika.rouge.session.RougeSession;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -14,12 +18,17 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Drives an active step-by-step build: tracks the current plan, step index, and a fixed
- * world anchor, and renders each step as an in-world hologram via {@link GhostRenderer}.
+ * Drives an active step-by-step build: tracks the current plan, step index, and a fixed world
+ * anchor, and renders each step as a translucent in-world hologram via {@link GhostRenderer}.
  *
- * <p>Steps carry cumulative block lists, so each step shows the whole build-so-far while
- * the blocks added <i>this</i> step are highlighted. The player advances by telling Rouge
- * "next" (handled in the session) rather than typing a command.
+ * <p>Steps carry cumulative block lists, so each step shows the whole build-so-far while the
+ * blocks added <i>this</i> step are highlighted. Difficulty (easy/medium/hard) hides a fraction
+ * of each step's blocks from the hologram — the learner must place those themselves. The full
+ * step (including hidden blocks) is registered with {@link LessonManager} as the diff target, so
+ * {@link ProactiveTutor} can detect when the step is complete and auto-advance.
+ *
+ * <p>The player advances by placing the blocks (auto-advance), by telling Rouge "next", or with
+ * {@code /rouge next}.
  */
 public final class StepSession {
 
@@ -50,7 +59,8 @@ public final class StepSession {
         anchor = computeAnchor();
 
         ChatDisplay.system("Building " + p.circuit() + " — " + total + " step"
-                + (total == 1 ? "" : "s") + ". " + locationLine());
+                + (total == 1 ? "" : "s") + ". The translucent hologram shows what to place; "
+                + "I'll say so and move on when each step matches. " + locationLine());
         showStep();
     }
 
@@ -65,6 +75,12 @@ public final class StepSession {
         }
         anchor = computeAnchor();
         ChatDisplay.system("Moved the hologram. " + locationLine());
+        showStep();
+    }
+
+    /** Re-renders the current step (used when difficulty changes). */
+    public static void refresh() {
+        if (plan == null) return;
         showStep();
     }
 
@@ -89,8 +105,9 @@ public final class StepSession {
         stepIndex++;
         if (stepIndex >= plan.steps().size()) {
             String circuit = plan.circuit();
-            GhostRenderer.clear();
             plan = null;
+            LessonManager.clearLesson();
+            RougeSession.endBuildMode();
             ChatDisplay.system("That's the whole " + circuit + " — nice work! The hologram's cleared. Ask me for another build any time.");
             return Advance.DONE;
         }
@@ -111,7 +128,8 @@ public final class StepSession {
     public static void stop() {
         if (plan == null) return;
         plan = null;
-        GhostRenderer.clear();
+        LessonManager.clearLesson();
+        RougeSession.endBuildMode();
         ChatDisplay.system("Stopped the build and cleared the hologram. Ping me when you want to pick it back up.");
     }
 
@@ -119,7 +137,17 @@ public final class StepSession {
         plan = null;
         stepIndex = 0;
         anchor = null;
-        GhostRenderer.clear();
+        LessonManager.clearLesson();
+    }
+
+    /**
+     * Called by {@link ProactiveTutor} when every block of the current step has been placed
+     * correctly. Congratulates the player and advances to the next step.
+     */
+    public static void onStepComplete() {
+        if (plan == null) return;
+        ChatDisplay.system("Great job! ✔");
+        next();
     }
 
     /** A one-line reminder of where the player is, for context on mid-build questions. */
@@ -135,19 +163,40 @@ public final class StepSession {
         int total = plan.steps().size();
 
         List<BlockEntry> all = step.blocks();
-        List<BlockEntry> added = blocksAddedThisStep();
+        BuildSpec stepSpec = toBuildSpec(all);
+        Level level = LessonManager.level();
 
-        GhostRenderer.show(anchor, all, added);
+        // The full step (including difficulty-hidden blocks) is the diff target for auto-advance.
+        LessonManager.setActive(stepSpec, anchor, level);
+
+        // The hologram only shows the difficulty-filtered subset; the new blocks among them glow.
+        List<BuildSpec.BlockEntry> shownSpec = Difficulty.shown(stepSpec, level);
+        List<BlockEntry> shown = GhostRenderer.fromSpec(shownSpec);
+
+        Set<Long> addedKeys = new HashSet<>();
+        for (BlockEntry b : blocksAddedThisStep()) {
+            addedKeys.add(BlockPos.asLong(b.x(), b.y(), b.z()));
+        }
+        List<BlockEntry> added = new ArrayList<>();
+        for (BlockEntry b : shown) {
+            if (addedKeys.contains(BlockPos.asLong(b.x(), b.y(), b.z()))) {
+                added.add(b);
+            }
+        }
+
+        GhostRenderer.show(anchor, shown, added.isEmpty() ? shown : added);
 
         ChatDisplay.system("Step " + (stepIndex + 1) + "/" + total + ": " + step.title());
         if (!step.explanation().isBlank()) {
             ChatDisplay.print(step.explanation());
         }
-        if (stepIndex + 1 < total) {
-            ChatDisplay.system("Place the glowing blocks, then say \"next\" when you're ready (or ask me anything).");
-        } else {
-            ChatDisplay.system("Last step — place the glowing blocks, then say \"next\" to finish.");
+        int hidden = stepSpec.blocks().size() - shownSpec.size();
+        if (hidden > 0) {
+            ChatDisplay.system("(" + level.lower() + ": " + hidden + " block" + (hidden == 1 ? "" : "s")
+                    + " hidden — figure those out yourself.)");
         }
+        ChatDisplay.system("Place the glowing blocks; I'll move on when the step matches. "
+                + "Say \"next\" to skip ahead, or ask me anything.");
     }
 
     /** Blocks in the current step that weren't in the previous step (by position). */
@@ -165,9 +214,42 @@ public final class StepSession {
                 added.add(b);
             }
         }
-        // If nothing is positionally new (e.g. a block-state change), highlight the whole
-        // step so the player still gets a visible cue.
+        // If nothing is positionally new (e.g. a block-state change), treat the whole step as new.
         return added.isEmpty() ? current : added;
+    }
+
+    /**
+     * Converts a step's cumulative block list into a {@link BuildSpec} for difficulty filtering
+     * and diffing. The step plan's entries carry no learning role, so we infer one from the block
+     * id (so difficulty still hides wiring/logic before inputs and outputs). Size is the block
+     * extent; coordinates are assumed non-negative (as the build library and AI directives emit).
+     */
+    private static BuildSpec toBuildSpec(List<BlockEntry> blocks) {
+        int maxX = 0, maxY = 0, maxZ = 0;
+        for (BlockEntry b : blocks) {
+            maxX = Math.max(maxX, b.x());
+            maxY = Math.max(maxY, b.y());
+            maxZ = Math.max(maxZ, b.z());
+        }
+        List<BuildSpec.BlockEntry> out = new ArrayList<>(blocks.size());
+        for (BlockEntry b : blocks) {
+            out.add(new BuildSpec.BlockEntry(b.x(), b.y(), b.z(), b.block(), inferRole(b.block())));
+        }
+        return new BuildSpec(maxX + 1, maxY + 1, maxZ + 1, out);
+    }
+
+    /** Best-effort role from a block id, so {@link Difficulty} hides wiring/logic first. */
+    private static String inferRole(String blockId) {
+        String s = blockId.toLowerCase();
+        if (s.contains("redstone_wire")) return "wire";
+        if (s.contains("repeater") || s.contains("comparator")) return "delay";
+        if (s.contains("lever") || s.contains("button") || s.contains("pressure_plate")
+                || s.contains("daylight_detector") || s.contains("tripwire")) return "input";
+        if (s.contains("lamp") || s.contains("piston") || s.contains("dispenser") || s.contains("dropper")
+                || s.contains("door") || s.contains("note_block") || s.contains("hopper") || s.contains("bell")) return "output";
+        if (s.contains("redstone_torch") || s.contains("redstone_block") || s.contains("observer")
+                || s.contains("target") || s.contains("slime") || s.contains("honey")) return "component";
+        return "support";
     }
 
     /**
