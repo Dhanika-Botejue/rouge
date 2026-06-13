@@ -3,15 +3,19 @@ package dev.dhanika.rouge.session;
 import dev.dhanika.rouge.ai.ChatMessage;
 import dev.dhanika.rouge.ai.OpenRouterClient;
 import dev.dhanika.rouge.ai.OpenRouterConfig;
+import dev.dhanika.rouge.build.BlockEntry;
 import dev.dhanika.rouge.build.BuildDirective;
 import dev.dhanika.rouge.build.CircuitLibrary;
+import dev.dhanika.rouge.build.CircuitPrimitive;
 import dev.dhanika.rouge.build.PlanningOutline;
 import dev.dhanika.rouge.build.StepPlan;
 import dev.dhanika.rouge.chat.ChatDisplay;
 import dev.dhanika.rouge.prompt.SystemPrompts;
 import dev.dhanika.rouge.render.GhostRenderer;
 import dev.dhanika.rouge.teach.StepSession;
+import dev.dhanika.rouge.ui.CircuitBrowserScreen;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.BlockPos;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +25,7 @@ import java.util.List;
 import java.util.concurrent.CompletionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Owns the conversational state machine for a Rouge session.
@@ -75,7 +80,19 @@ public final class RougeSession {
     private static StepPlan pendingPlan;
     private static PlanningOutline pendingOutline;
     private static int repairAttempts = 0;
+    // True while we await the AI's reply to a build-browser stitch request, so the resulting
+    // build is routed through a preview + confirm (CONFIRM_BUILD) instead of building at once.
+    private static boolean awaitingStitch = false;
+    // True when the next build request should go to the AI planning flow (set by /rouge interact),
+    // bypassing the build-browser intercept for that one message.
+    private static boolean primedInteractive = false;
     private static String lastQuery = "";
+
+    // Build-intent verbs: a chat message matching these (in CHAT mode) opens the build browser
+    // so the player can pick parts, instead of going straight to the AI. Conceptual questions
+    // (no build verb) still flow to the AI as normal redstone Q&A.
+    private static final Pattern BUILD_VERBS = Pattern.compile(
+            "\\b(build|rebuild|make|create|construct|assemble|wire)\\b", Pattern.CASE_INSENSITIVE);
     private static final List<ChatMessage> history = new ArrayList<>();
 
     private RougeSession() {}
@@ -112,7 +129,81 @@ public final class RougeSession {
         history.add(ChatMessage.system(
                 "The player has explicitly requested interactive planning mode. For their next build request, "
                 + "respond with a rougeplanning outline fence — do NOT jump straight to a rougebuild."));
+        // The next build request should plan with the AI, not open the part picker.
+        primedInteractive = true;
         ChatDisplay.system("Interactive mode on. Describe the build you want — we'll plan it together before building.");
+    }
+
+    /**
+     * Stitches a set of hand-picked library circuits into one build. Invoked from the build
+     * browser window: the player ranks/searches the library, checks the parts they want, and
+     * Rouge merges the most relevant section of each into a single design matching {@code goal}.
+     *
+     * <p>The picked designs' verified block data is handed to the AI with a merge instruction;
+     * the returned build is routed through {@link Mode#CONFIRM_BUILD} so the player sees a gold
+     * preview hologram and confirms before the step-by-step build begins.
+     */
+    public static void stitchSelected(String goal, List<CircuitPrimitive> parts) {
+        if (parts == null || parts.isEmpty()) return;
+        if (!open) openSession();
+        if (awaitingReply) {
+            ChatDisplay.system("Rouge is still thinking… give it a moment, then stitch again.");
+            return;
+        }
+
+        // Drop any half-finished interaction; a fresh stitch supersedes it.
+        mode = Mode.CHAT;
+        pendingPlan = null;
+        pendingOutline = null;
+        repairAttempts = 0;
+        GhostRenderer.clearPreview();
+        awaitingStitch = true;
+
+        history.add(ChatMessage.system(stitchContext(goal, parts)));
+        String userMsg = (goal == null || goal.isBlank())
+                ? "Stitch the circuits I selected into one combined build."
+                : "Stitch the circuits I selected into: " + goal.trim();
+        lastQuery = (goal == null) ? "" : goal;
+        history.add(ChatMessage.user(userMsg));
+
+        String names = parts.stream().map(CircuitPrimitive::title).collect(Collectors.joining(", "));
+        ChatDisplay.system("Stitching " + parts.size() + " design" + (parts.size() == 1 ? "" : "s")
+                + " together (" + names + ")…");
+        dispatchToAi();
+    }
+
+    /** Per-call system context for a stitch: the merge instruction plus each part's block data. */
+    private static String stitchContext(String goal, List<CircuitPrimitive> parts) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("STITCH REQUEST. The player opened the build browser and hand-picked the verified library ")
+          .append("circuits below. Take the MOST RELEVANT section of EACH selected circuit and merge those ")
+          .append("sections into ONE coherent, working redstone build that best matches the player's goal");
+        sb.append((goal == null || goal.isBlank()) ? ". " : ": \"" + goal.trim() + "\". ");
+        sb.append("Do NOT simply place them side by side — keep the parts that matter, drop what doesn't, ")
+          .append("reposition blocks so nothing overlaps, and add the minimal redstone needed to connect them.\n\n")
+          .append("SELECTED CIRCUITS (verified block data; each circuit's coordinates are in its own local space):\n");
+        for (CircuitPrimitive p : parts) {
+            sb.append("=== ").append(p.title()).append(" [id=").append(p.id())
+              .append(", ").append(p.footprint()).append("] — ").append(p.description()).append('\n');
+            sb.append("blocks: ").append(blocksJson(p.blocks())).append('\n');
+        }
+        sb.append("\nReply with exactly ONE ```rougebuild``` CUSTOM directive: a \"circuit\" name and \"steps\" whose ")
+          .append("\"blocks\" are CUMULATIVE (each step lists every block placed so far), reusing the real block ids ")
+          .append("and coordinates above where they fit. Aim for 3-7 steps, each a meaningful chunk with a short ")
+          .append("teaching \"explanation\". Then one short plain-text line introducing the stitched build, nothing else.");
+        return sb.toString();
+    }
+
+    /** Compact JSON array of block entries for embedding in the stitch context. */
+    private static String blocksJson(List<BlockEntry> blocks) {
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < blocks.size(); i++) {
+            BlockEntry b = blocks.get(i);
+            if (i > 0) sb.append(',');
+            sb.append("{\"x\":").append(b.x()).append(",\"y\":").append(b.y())
+              .append(",\"z\":").append(b.z()).append(",\"block\":\"").append(b.block()).append("\"}");
+        }
+        return sb.append(']').toString();
     }
 
     private static void openSession() {
@@ -122,6 +213,8 @@ public final class RougeSession {
         pendingPlan = null;
         pendingOutline = null;
         repairAttempts = 0;
+        awaitingStitch = false;
+        primedInteractive = false;
         lastQuery = "";
         history.clear();
         history.add(ChatMessage.system(SystemPrompts.redstoneTutor()));
@@ -137,6 +230,8 @@ public final class RougeSession {
         pendingOutline = null;
         GhostRenderer.clearPreview();
         repairAttempts = 0;
+        awaitingStitch = false;
+        primedInteractive = false;
         lastQuery = "";
         history.clear();
         StepSession.reset();
@@ -150,6 +245,8 @@ public final class RougeSession {
         pendingPlan = null;
         pendingOutline = null;
         repairAttempts = 0;
+        awaitingStitch = false;
+        primedInteractive = false;
         lastQuery = "";
         history.clear();
     }
@@ -163,8 +260,81 @@ public final class RougeSession {
             case CONFIRM_BUILD -> handleConfirm(text);
             case BUILDING -> handleBuilding(text);
             case PLANNING -> handlePlanning(text);
-            case CHAT -> sendToAi(text);
+            case CHAT -> handleChat(text);
         }
+    }
+
+    /**
+     * Routes a chat-mode message. A build request opens the part picker (build browser) seeded
+     * with the request, so the player always gets to select parts first. Conceptual questions go
+     * to the AI as normal redstone Q&A. An explicit {@code /rouge interact} priming takes
+     * precedence for one message so the AI planning flow still works.
+     */
+    private static void handleChat(String text) {
+        if (primedInteractive) {
+            primedInteractive = false;
+            sendToAi(text);
+            return;
+        }
+        if (looksLikeBuildRequest(text)) {
+            CircuitBrowserScreen.open(extractTopic(text));
+            return;
+        }
+        sendToAi(text);
+    }
+
+    /** True when a chat message reads as a request to build/make something (vs. a question). */
+    private static boolean looksLikeBuildRequest(String text) {
+        String t = text.toLowerCase().strip();
+        if (t.isEmpty()) return false;
+        if (t.startsWith("show me how") || t.startsWith("how do i") || t.startsWith("how to")
+                || t.startsWith("teach me") || t.startsWith("teach ")) {
+            return true;
+        }
+        if (t.matches("^i (want|need|wanna|would like|'d like)\\b.*")) return true;
+        return BUILD_VERBS.matcher(t).find();
+    }
+
+    /**
+     * Reduces a build request to clean search keywords by stripping leading filler/verb words,
+     * so the picker's search box seeds with the topic ("flying machine") not the whole sentence
+     * ("build me a flying machine").
+     */
+    private static String extractTopic(String text) {
+        String t = text.strip().replaceAll("[?.!]+$", "").strip();
+        String[] tokens = t.split("\\s+");
+        java.util.Set<String> filler = java.util.Set.of(
+                "build", "rebuild", "make", "create", "construct", "assemble", "wire", "design",
+                "teach", "show", "how", "do", "to", "i", "want", "need", "wanna", "would", "like",
+                "give", "can", "could", "you", "please", "lets", "let's", "me", "us", "a", "an",
+                "the", "some", "my", "another", "new", "up");
+        int i = 0;
+        while (i < tokens.length && filler.contains(tokens[i].toLowerCase())) i++;
+        String topic = String.join(" ", java.util.Arrays.copyOfRange(tokens, i, tokens.length)).strip();
+        return topic.isEmpty() ? t : topic;
+    }
+
+    /**
+     * Defers to the AI to pick (and stitch) a build itself — the behavior behind the build
+     * browser's "Let Rouge choose" button. Sends the goal straight to the AI, bypassing the
+     * picker intercept so it doesn't loop back into the window.
+     */
+    public static void buildWithAi(String goal) {
+        if (!open) openSession();
+        if (awaitingReply) {
+            ChatDisplay.system("Rouge is still thinking… give it a moment.");
+            return;
+        }
+        mode = Mode.CHAT;
+        pendingPlan = null;
+        pendingOutline = null;
+        awaitingStitch = false;
+        primedInteractive = false;
+        GhostRenderer.clearPreview();
+        String msg = (goal == null || goal.isBlank())
+                ? "Pick a redstone build that fits and show me." : goal.strip();
+        ChatDisplay.system("Letting Rouge pick a build for you…");
+        sendToAi(msg);
     }
 
     // --- mode handlers ---
@@ -197,6 +367,7 @@ public final class RougeSession {
             case YES -> {
                 StepPlan plan = pendingPlan;
                 pendingPlan = null;
+                GhostRenderer.clearPreview(); // hand off from the gold preview to the step hologram
                 mode = Mode.BUILDING;
                 StepSession.start(plan, buildMode == BuildMode.PLACE);
                 if (!StepSession.isActive()) {
@@ -205,12 +376,14 @@ public final class RougeSession {
             }
             case NO -> {
                 pendingPlan = null;
+                GhostRenderer.clearPreview();
                 mode = Mode.CHAT;
-                ChatDisplay.system("No worries — ask me anything else, or describe a different build.");
+                ChatDisplay.system("No worries — discarded that build. Ask me anything else, or browse parts to stitch again.");
             }
             case OTHER -> {
                 // Treat as a follow-up: drop the stale proposal and let the AI re-plan.
                 pendingPlan = null;
+                GhostRenderer.clearPreview();
                 mode = Mode.CHAT;
                 sendToAi(text);
             }
@@ -299,6 +472,7 @@ public final class RougeSession {
         if (!open) return;
 
         if (err != null) {
+            awaitingStitch = false;
             removeTrailingUserMessage();
             ChatDisplay.error(rootMessage(err));
             return;
@@ -310,6 +484,7 @@ public final class RougeSession {
             String outlineJson = pm.group(1).trim();
             String chatPart = PLANNING_FENCE.matcher(reply).replaceAll("").trim();
             try {
+                awaitingStitch = false; // the planning fence itself provides the preview + confirm
                 pendingOutline = PlanningOutline.fromJson(outlineJson);
                 mode = Mode.PLANNING;
                 history.add(ChatMessage.assistant(chatPart.isEmpty() ? "[planning outline]" : chatPart));
@@ -346,16 +521,31 @@ public final class RougeSession {
                 StepPlan plan = BuildDirective.resolve(planJson);
                 if (plan.steps().isEmpty()) throw new IllegalStateException("empty plan");
 
-                pendingOutline = null;
-                GhostRenderer.clearPreview();
-                mode = Mode.BUILDING;
-                StepSession.start(plan, buildMode == BuildMode.PLACE);
-                if (!StepSession.isActive()) {
-                    mode = Mode.CHAT;
-                }
-
                 history.add(ChatMessage.assistant(chatPart.isEmpty() ? "[build proposal]" : chatPart));
-                if (!chatPart.isEmpty()) ChatDisplay.print(chatPart);
+
+                if (awaitingStitch) {
+                    // A stitched build: show it as a gold preview and wait for the player to confirm,
+                    // rather than dropping straight into the step-by-step hologram.
+                    awaitingStitch = false;
+                    pendingOutline = null;
+                    pendingPlan = plan;
+                    mode = Mode.CONFIRM_BUILD;
+                    showPreview(plan);
+                    if (!chatPart.isEmpty()) ChatDisplay.print(chatPart);
+                    int blocks = finalStepBlocks(plan).size();
+                    ChatDisplay.system("Stitched a build — " + plan.steps().size() + " step"
+                            + (plan.steps().size() == 1 ? "" : "s") + ", " + blocks
+                            + " blocks (previewed in gold). Say \"yes\" to build it step by step, or \"no\" to discard.");
+                } else {
+                    pendingOutline = null;
+                    GhostRenderer.clearPreview();
+                    mode = Mode.BUILDING;
+                    StepSession.start(plan, buildMode == BuildMode.PLACE);
+                    if (!StepSession.isActive()) {
+                        mode = Mode.CHAT;
+                    }
+                    if (!chatPart.isEmpty()) ChatDisplay.print(chatPart);
+                }
             } catch (Exception e) {
                 LOGGER.warn("[Rouge] Failed to parse build directive: {}\nRaw JSON:\n{}", e.getMessage(), planJson, e);
                 attemptRepairOrClarify(reply, e.getMessage());
@@ -397,6 +587,20 @@ public final class RougeSession {
     private static String safeError(String error) {
         if (error == null || error.isBlank()) return "invalid JSON";
         return error.length() > 160 ? error.substring(0, 160) + "…" : error;
+    }
+
+    /** Final cumulative block list of a plan (its last step), or empty for an empty plan. */
+    private static List<BlockEntry> finalStepBlocks(StepPlan plan) {
+        List<StepPlan.Step> steps = plan.steps();
+        return steps.isEmpty() ? List.of() : steps.get(steps.size() - 1).blocks();
+    }
+
+    /** Shows the plan's full footprint as a gold preview hologram anchored in front of the player. */
+    private static void showPreview(StepPlan plan) {
+        List<BlockEntry> blocks = finalStepBlocks(plan);
+        if (blocks.isEmpty()) return;
+        BlockPos anchor = StepSession.computeAnchorFor(blocks);
+        GhostRenderer.showPreview(anchor, blocks);
     }
 
     private static void removeTrailingUserMessage() {

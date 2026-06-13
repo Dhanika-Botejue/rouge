@@ -18,6 +18,26 @@ Rouge has two independent modes:
 | --- | --- |
 | `/rouge` | Toggle the chat session on/off. Open it, ask redstone questions, ask it to build something. |
 
+## Build browser (stitch parts yourself)
+
+**Asking Rouge to build something now opens this window automatically.** In an open session, any
+build request ("build me a piston door", "teach me an RS latch", "I want an item sorter") pops the
+build browser so you choose the parts. Plain questions ("how does quasi-connectivity work?") still
+go straight to the chat tutor.
+
+| Command | What it does |
+| --- | --- |
+| `/rouge browse` | Open the build browser manually — a window listing every buildable library circuit. |
+| `/rouge browse <query>` | Same, pre-ranked by your query (e.g. `/rouge browse piston door`). |
+
+In the window, search/filter the library, **check the parts you want**, and hit
+**Stitch selected**. Rouge merges the most relevant section of each picked circuit into one
+build, previews it as a gold hologram, and asks you to confirm before building it step by step.
+Selections persist across searches, so you can pull parts from several queries into one stitch.
+
+Don't want to pick? Hit **Let Rouge choose** and Rouge selects and builds for you — the classic
+flow. (Use `/rouge interact` instead if you want to plan it out conversationally first.)
+
 ## Hologram building (chat teacher)
 
 These drive an active step-by-step build. You can also just **talk** — saying "yes", "no",
@@ -68,7 +88,7 @@ While a `/rouge` session is open, plain chat drives the flow:
 
 | You say | Effect |
 | --- | --- |
-| (a request, e.g. "teach me a T flip-flop") | Rouge proposes a build and starts the hologram. |
+| (a build request, e.g. "teach me a T flip-flop") | Opens the build browser to pick parts (or "Let Rouge choose"). |
 | `yes` / `next` | Confirm / advance to the next step. |
 | `no` / `stop` | Decline / cancel the current build. |
 | (any other question) | Routed to the AI — you can ask questions mid-build. |

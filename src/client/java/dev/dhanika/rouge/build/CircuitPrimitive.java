@@ -51,6 +51,14 @@ public final class CircuitPrimitive {
         return StepPlan.of(title, steps);
     }
 
+    /**
+     * The full block layout of this circuit — the last step's blocks, which are cumulative,
+     * so they contain every block the finished build places. Empty for blueprint entries.
+     */
+    public List<BlockEntry> blocks() {
+        return steps.isEmpty() ? List.of() : steps.get(steps.size() - 1).blocks();
+    }
+
     public static CircuitPrimitive fromJson(String raw) {
         JsonObject root = JsonParser.parseString(raw.trim()).getAsJsonObject();
 

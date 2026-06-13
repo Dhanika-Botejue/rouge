@@ -20,11 +20,12 @@ the world as a **step-by-step hologram** you follow block by block — no extern
 schematic mod required.
 
 1. **Ask** — `/rouge`, then "build me a 2x2 piston door" or "teach me an RS latch".
-2. **Rouge proposes a build** — it either **retrieves** a matching build from its
-   library or **composes** a bigger one out of known parts, and asks you to confirm.
-3. **Build it step by step** — say **yes** and Rouge anchors a ghost preview in front
-   of you, glowing the blocks to place *this* step and explaining *why*. Place them,
-   say **next**, and the next step appears. Repeat until it's done.
+2. **Pick the parts** — a build browser opens with the best-matching library circuits.
+   Check one or more and **Stitch selected** to merge them into one build, or hit
+   **Let Rouge choose** to have Rouge select and compose it for you.
+3. **Build it step by step** — Rouge previews the build, and on **yes** anchors a ghost
+   preview in front of you, glowing the blocks to place *this* step and explaining *why*.
+   Place them, say **next**, and the next step appears. Repeat until it's done.
 
 Replies print to **your own** chat as a purple `[Rouge]` line (client-side; nothing
 goes to public chat). You can ask questions mid-build at any time.
@@ -42,6 +43,7 @@ goes to public chat). You can ask questions mid-build at any time.
 While you build, Rouge quietly points out wrong placements — computed locally, so
 it never spends API calls or rate-limits you.
 | `/rouge` | Toggle the building-teacher session |
+| `/rouge browse [query]` | Open the build browser — pick library parts and stitch them into one build |
 | `/rouge next` | Advance to the next build step (same as saying "next") |
 | `/rouge step` | Re-show the current step's hologram |
 | `/rouge stop` | Cancel the active build and clear the hologram |

@@ -80,42 +80,12 @@ public final class CircuitLibrary {
         }
 
         // Split query into lowercase alphanumeric words.
-        String[] words = query.toLowerCase().replaceAll("[^a-z0-9\\s-]", "").split("\\s+");
+        String[] words = queryWords(query);
 
         // Score each primitive.
         List<ScoredPrimitive> scored = new ArrayList<>();
         for (CircuitPrimitive p : all) {
-            int score = 0;
-            String id = p.id().toLowerCase();
-            String title = p.title().toLowerCase();
-            String desc = p.description().toLowerCase();
-
-            for (String w : words) {
-                if (w.isEmpty()) continue;
-                if (id.equals(w)) {
-                    score += 15;
-                } else if (id.contains(w)) {
-                    score += 8;
-                }
-
-                if (title.contains(w)) {
-                    score += 6;
-                }
-
-                for (String alias : p.aliases()) {
-                    String a = alias.toLowerCase();
-                    if (a.equals(w)) {
-                        score += 10;
-                    } else if (a.contains(w)) {
-                        score += 5;
-                    }
-                }
-
-                if (desc.contains(w)) {
-                    score += 2;
-                }
-            }
-            scored.add(new ScoredPrimitive(p, score));
+            scored.add(new ScoredPrimitive(p, score(p, words)));
         }
 
         // Sort by score descending.
@@ -146,6 +116,69 @@ public final class CircuitLibrary {
         }
 
         return sb.toString();
+    }
+
+    /**
+     * Buildable primitives (those with verified block data) ranked by relevance to the query,
+     * best match first. Used by the build browser so the player sees the same ranked matches the
+     * AI does. A blank query returns them in library order. Blueprints are excluded because they
+     * have no block data to stitch.
+     */
+    public static List<CircuitPrimitive> rankedBuildable(String query) {
+        String[] words = queryWords(query);
+        List<ScoredPrimitive> scored = new ArrayList<>();
+        for (CircuitPrimitive p : getAll()) {
+            if (!p.isBuildable()) continue;
+            scored.add(new ScoredPrimitive(p, score(p, words)));
+        }
+        // Stable sort keeps library order among equal-scoring (e.g. blank-query) entries.
+        scored.sort((a, b) -> Integer.compare(b.score, a.score));
+        List<CircuitPrimitive> out = new ArrayList<>(scored.size());
+        for (ScoredPrimitive sp : scored) {
+            out.add(sp.prim);
+        }
+        return out;
+    }
+
+    /** Splits a query into lowercase alphanumeric words; empty/null yields an empty array. */
+    private static String[] queryWords(String query) {
+        if (query == null || query.isBlank()) return new String[0];
+        return query.toLowerCase().replaceAll("[^a-z0-9\\s-]", "").split("\\s+");
+    }
+
+    /** Relevance score of one primitive against the query words (id/aliases weigh most). */
+    private static int score(CircuitPrimitive p, String[] words) {
+        int score = 0;
+        String id = p.id().toLowerCase();
+        String title = p.title().toLowerCase();
+        String desc = p.description().toLowerCase();
+
+        for (String w : words) {
+            if (w.isEmpty()) continue;
+            if (id.equals(w)) {
+                score += 15;
+            } else if (id.contains(w)) {
+                score += 8;
+            }
+
+            if (title.contains(w)) {
+                score += 6;
+            }
+
+            for (String alias : p.aliases()) {
+                String a = alias.toLowerCase();
+                if (a.equals(w)) {
+                    score += 10;
+                } else if (a.contains(w)) {
+                    score += 5;
+                }
+            }
+
+            if (desc.contains(w)) {
+                score += 2;
+            }
+        }
+        return score;
     }
 
     private static final class ScoredPrimitive {

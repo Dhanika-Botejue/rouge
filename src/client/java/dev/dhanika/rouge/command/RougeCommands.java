@@ -9,6 +9,7 @@ import dev.dhanika.rouge.session.RougeSession;
 import dev.dhanika.rouge.session.RougeSession.BuildMode;
 import dev.dhanika.rouge.teach.LessonManager;
 import dev.dhanika.rouge.teach.StepSession;
+import dev.dhanika.rouge.ui.CircuitBrowserScreen;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.minecraft.client.Minecraft;
@@ -28,6 +29,16 @@ public final class RougeCommands {
                         .then(ClientCommandManager.literal("interact")
                                 .executes(ctx -> {
                                     RougeSession.openInteractive();
+                                    return 1;
+                                }))
+                        .then(ClientCommandManager.literal("browse")
+                                .then(ClientCommandManager.argument("query", StringArgumentType.greedyString())
+                                        .executes(ctx -> {
+                                            CircuitBrowserScreen.open(StringArgumentType.getString(ctx, "query"));
+                                            return 1;
+                                        }))
+                                .executes(ctx -> {
+                                    CircuitBrowserScreen.open("");
                                     return 1;
                                 }))
                         .then(ClientCommandManager.literal("next")
