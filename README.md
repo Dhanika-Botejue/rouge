@@ -1,65 +1,63 @@
 # Rouge
 
-A **visual redstone building teacher** for Minecraft, built as a client-side Fabric mod.
+A visual redstone building teacher for Minecraft, built as a Fabric mod that runs on the
+client.
 
 Open a chat session, ask Rouge to build something, and it projects the build into the world
-as a **step-by-step, translucent hologram** you follow block by block — no external schematic
-mod required. As you place each step's blocks correctly, Rouge detects it locally, says
-"Great job!", and **advances on its own**.
+as a translucent hologram you follow one block at a time. No external schematic mod is
+required. As you place each step's blocks correctly, Rouge detects it locally, says "Great
+job!", and advances on its own.
 
-1. **Ask** - `/rouge`, then "build me a 2x2 piston door" or "teach me an RS latch".
-2. **Rouge proposes a build** - it either **retrieves** a matching build from its library or
-   **composes** a bigger one out of known parts, and asks you to confirm.
-3. **Build it step by step** - say **yes** and Rouge anchors a translucent ghost preview in
-   front of you, glowing the blocks to place *this* step and explaining *why*. Place them and
-   the next step appears automatically. Repeat until it's done.
+1. Ask. Type `/rouge`, then say something like "build me a 2x2 piston door" or "teach me an
+   RS latch".
+2. Rouge proposes a build. It either retrieves a matching build from its library or composes a
+   bigger one out of known parts, then asks you to confirm.
+3. Build it one step at a time. Say yes and Rouge anchors a translucent ghost preview in front
+   of you, glowing the blocks to place for this step and explaining why. Place them and the
+   next step appears automatically. Repeat until the build is done.
 
-Replies print to **your own** chat as a purple `[Rouge]` line (client-side; nothing goes to
-public chat). You can ask questions mid-build at any time.
+Replies print to your own chat as a purple `[Rouge]` line, so nothing goes to public chat. You
+can ask questions during a build at any time.
 
 ## Difficulty
 
-Set how much of each step the hologram reveals with `/rouge level`:
+Set how much of each step the hologram reveals with `/rouge level`.
 
-| Level | Hidden | Meaning |
-| --- | --- | --- |
-| `easy` | 0% | The hologram shows every block of the step. |
-| `medium` | 30% | 30% of each step's blocks are hidden — you work them out and place them. |
-| `hard` | 50% | Half of each step's blocks are hidden. |
+* `easy` hides nothing, so the hologram shows every block of the step.
+* `medium` hides 30% of each step's blocks, and you work them out and place them yourself.
+* `hard` hides half of each step's blocks.
 
-Hidden blocks are still part of the build: you must place them correctly for the step to
-complete and advance. Rouge biases hiding toward wiring/logic first and keeps inputs/outputs
-visible longest, so the visible scaffold stays meaningful. Hidden or not, Rouge flags wrong
-placements automatically (computed locally, so no API calls).
+Hidden blocks are still part of the build. You must place them correctly for the step to
+complete and advance. Rouge biases hiding toward wiring and logic first and keeps inputs and
+outputs visible longest, so the visible scaffold stays meaningful. Whether a block is hidden
+or not, Rouge flags wrong placements automatically, computed locally with no API calls.
 
 ## Commands
 
-| Command | What it does |
-| --- | --- |
-| `/rouge` | Toggle the building-teacher session |
-| `/rouge next` | Skip ahead to the next build step (same as saying "next") |
-| `/rouge step` | Re-show the current step's hologram |
-| `/rouge move` | Re-place the hologram in front of where you're standing |
-| `/rouge stop` | Cancel the active build and clear the hologram |
-| `/rouge level easy\|medium\|hard` | Set difficulty (hides 0 / 30 / 50% of each step) |
-| `/rouge load` | Load the bundled sample lesson as a hologram (works without the AI) |
-| `/rouge solution` | Place the full solution in the world (the answer key — singleplayer) |
-| `/rouge check` | Report your progress vs. the solution |
-| `/rouge model [id]` | Show or switch the chat model |
+* `/rouge` toggles the building teacher session.
+* `/rouge next` skips ahead to the next build step, the same as saying "next".
+* `/rouge step` shows the current step's hologram again.
+* `/rouge move` places the hologram in front of where you are standing.
+* `/rouge stop` cancels the active build and clears the hologram.
+* `/rouge level easy|medium|hard` sets the difficulty, hiding 0, 30, or 50% of each step.
+* `/rouge load` loads the bundled sample lesson as a hologram, which works without the AI.
+* `/rouge solution` places the full solution in the world as the answer key for singleplayer.
+* `/rouge check` reports your progress against the solution.
+* `/rouge model [id]` shows or switches the chat model.
 
-During a session you mostly just **talk**: "yes", "no", "next", and "move" drive the flow,
+During a session you mostly just talk. Saying "yes", "no", "next", and "move" drives the flow,
 so the commands are optional shortcuts. See [`ROUGE-COMMANDS.md`](ROUGE-COMMANDS.md) for the
 full reference.
 
 ## The build library
 
-Rouge ships a library of redstone builds under `src/main/resources/rouge/circuits/`:
+Rouge ships a library of redstone builds under `src/main/resources/rouge/circuits/`.
 
-- **Buildable primitives** with verified, hand-authored block data — logic gates, latches,
-  clocks, pulse circuits, piston push, a redstone lamp. These are retrieved or stitched
-  together verbatim, so the hologram is always correct.
-- **Blueprint builds**: described in detail but generated on demand: flying machines,
-  2x2 / 3x3 piston doors, TNT dupers and cannons, item elevators and sorters, auto farms,
+* Buildable primitives come with verified block data authored by hand, covering logic gates,
+  latches, clocks, pulse circuits, piston push, and a redstone lamp. Rouge retrieves or
+  stitches these together verbatim, so the hologram is always correct.
+* Blueprint builds are described in detail but generated on demand, such as flying machines,
+  2x2 and 3x3 piston doors, TNT dupers and cannons, item elevators and sorters, auto farms,
   hidden staircases, and more. Rouge composes these from primitives or generates a build that
   follows the blueprint.
 
@@ -68,22 +66,22 @@ To add a build, drop a new JSON file in that folder and add its id to `IDS` in
 
 ## Requirements
 
-- **Minecraft 1.20.1** with **Fabric Loader** + **Fabric API**.
-- **JDK 21** to run the build. Fabric Loom 1.16 requires Java 21, even though the mod itself
-  compiles to **Java 17** bytecode (so the built jar runs on a normal 1.20.1 client). The
-  Gradle wrapper (`./gradlew`) handles the Gradle version — you only need to supply a JDK.
-- An **OpenRouter API key** — sign in at <https://openrouter.ai>, open **Keys**, and create
-  one. Free models work without paid credits.
+* Minecraft 1.20.1 with the Fabric Loader and Fabric API.
+* JDK 21 to run the build. Fabric Loom 1.16 requires Java 21, even though the mod itself
+  compiles to Java 17 bytecode, so the built jar runs on a normal 1.20.1 client. The Gradle
+  wrapper (`./gradlew`) handles the Gradle version, so you only need to supply a JDK.
+* An OpenRouter API key. Sign in at <https://openrouter.ai>, open Keys, and create one. Free
+  models work without paid credits.
 
-No extra Minecraft mods are needed. The hologram is rendered by Rouge itself.
+No extra Minecraft mods are needed. Rouge renders the hologram itself.
 
 ## Setup
 
 ### 1. Install JDK 21
 
-On this machine, Homebrew can't install a JDK (the `temurin` cask needs `sudo` and the
-`openjdk` formula needs full Xcode), so use a prebuilt **Temurin** tarball — no admin rights
-required:
+On this machine Homebrew cannot install a JDK, because the `temurin` cask needs `sudo` and the
+`openjdk` formula needs full Xcode. Use a prebuilt Temurin tarball instead, which needs no
+admin rights.
 
 ```sh
 mkdir -p "$HOME/.jdks"
@@ -93,26 +91,25 @@ tar -xzf /tmp/temurin21.tar.gz -C "$HOME/.jdks"
 ```
 
 This extracts to `~/.jdks/jdk-21.0.x+y/Contents/Home`. The build JDK is pinned in
-`gradle.properties` via `org.gradle.java.home`, so **no `JAVA_HOME` export is needed**. If
-your JDK ends up at a different path, update that one line in `gradle.properties` to match.
+`gradle.properties` through `org.gradle.java.home`, so you do not need to export `JAVA_HOME`.
+If your JDK ends up at a different path, update that one line in `gradle.properties` to match.
 
 ### 2. Add your OpenRouter API key
 
-Put the key in a `.env` file at the project root. This file is **gitignored - never commit
-it**:
+Put the key in a `.env` file at the project root. This file is gitignored, so never commit it.
 
 ```sh
 echo 'OPENROUTER_API_KEY=sk-or-...your-key...' > .env
 ```
 
-How the key is loaded:
+The key is loaded in two ways.
 
-- **Development (`./gradlew runClient`):** `build.gradle` reads `.env` fresh on every build and
-  injects the key into the dev client. (Reading from `.env` rather than the shell environment
-  avoids a stale Gradle daemon serving an old value.) If `.env` is absent, it falls back to the
-  `OPENROUTER_API_KEY` environment variable.
-- **Production install:** the mod reads the `OPENROUTER_API_KEY` environment variable directly,
-  so set it in the launcher's environment.
+* During development with `./gradlew runClient`, `build.gradle` reads `.env` fresh on every
+  build and injects the key into the dev client. Reading from `.env` rather than the shell
+  environment avoids a stale Gradle daemon serving an old value. If `.env` is absent, it falls
+  back to the `OPENROUTER_API_KEY` environment variable.
+* For a production install, the mod reads the `OPENROUTER_API_KEY` environment variable
+  directly, so set it in the launcher's environment.
 
 ## Run (development)
 
@@ -120,64 +117,70 @@ How the key is loaded:
 ./gradlew runClient
 ```
 
-The first launch downloads Minecraft assets and is slow; later launches are fast. Then
-in-game:
+The first launch downloads Minecraft assets and is slow, while later launches are fast. Then
+in the game, do the following.
 
-1. Enter a **singleplayer world** (the AI call needs you in a world).
-2. Press `T`, type `/rouge` → `[Rouge] Session open.`
-3. Ask Rouge to build something, e.g. `teach me a T flip-flop` or `build me a flying machine`.
-4. Say **yes** to start, then build the glowing translucent blocks. Rouge advances each step
-   as you finish it. Set `/rouge level medium` (or `hard`) to make it hide more.
+1. Enter a singleplayer world, since the AI call needs you in a world.
+2. Press `T` and type `/rouge`, which prints `[Rouge] Session open.`
+3. Ask Rouge to build something, for example `teach me a T flip flop` or `build me a flying
+   machine`.
+4. Say yes to start, then build the glowing translucent blocks. Rouge advances each step as you
+   finish it. Set `/rouge level medium` or `hard` to make it hide more.
 5. Type `/rouge` again to close the session.
 
-No AI key handy? `/rouge load` loads a bundled sample lesson as a hologram so the build/practice
-loop works without the AI.
+No AI key handy? `/rouge load` loads a bundled sample lesson as a hologram, so the build and
+practice loop works without the AI.
 
 ### Troubleshooting
 
-- **`[Rouge] OpenRouter rejected the API key` / "No auth credentials found"** — the key isn't
-  reaching the game. Confirm `.env` contains a valid `OPENROUTER_API_KEY=...` line, then force a
-  clean run: `./gradlew --stop` followed by `./gradlew runClient`.
-- **`429` rate limit** — free models are rate-limited; wait a few seconds, or switch with
+* If you see `[Rouge] OpenRouter rejected the API key` or "No auth credentials found", the key
+  is not reaching the game. Confirm `.env` contains a valid `OPENROUTER_API_KEY=...` line, then
+  force a clean run with `./gradlew --stop` followed by `./gradlew runClient`.
+* A `429` response means the free models are rate limited, so wait a few seconds or switch with
   `/rouge model <id>`.
-- **No hologram appears** — make sure you confirmed the build (said "yes"); the ghost anchors a
-  couple of blocks in front of where you were standing. `/rouge step` re-shows it, `/rouge move`
-  brings it to you.
-- **A step won't auto-advance** — the diff is matched by base block id (orientation is lenient),
-  but every block of the step (including difficulty-hidden ones) must be present. `/rouge check`
-  shows what's still missing or wrong; `/rouge level easy` reveals everything.
-- **Startup log** should show `Rouge initialized (model: ...)` with no missing-token warning.
+* If no hologram appears, make sure you confirmed the build by saying "yes". The ghost anchors
+  a couple of blocks in front of where you were standing. `/rouge step` shows it again, and
+  `/rouge move` brings it to you.
+* If a step will not advance on its own, note that the diff is matched by base block id and
+  orientation is lenient, but every block of the step must be present, including the ones
+  hidden by difficulty. `/rouge check` shows what is still missing or wrong, and `/rouge level
+  easy` reveals everything.
+* The startup log should show `Rouge initialized (model: ...)` with no missing token warning.
 
 ## Configuration
 
-- **Model:** in `src/client/java/dev/dhanika/rouge/ai/OpenRouterConfig.java`, `model` is the
-  chat model (default `openai/gpt-oss-20b:free`). It's a one-line swap — including to paid
-  models — from <https://openrouter.ai/models>.
-- **Prompt:** `src/main/resources/rouge/system_prompt.txt` — the teacher persona and the
-  build-directive protocol. Loaded from resources, so no recompile needed to edit.
-- **Sample lesson:** `src/main/resources/rouge/sample_solution.json`.
-- **Difficulty fractions / ghost transparency:** `build/Difficulty.java` (per-level hide
-  fractions) and `render/GhostRenderer.java` (`GHOST_ALPHA`).
+* The chat model lives in `src/client/java/dev/dhanika/rouge/ai/OpenRouterConfig.java`, where
+  `model` defaults to `openai/gpt-oss-20b:free`. Swapping it is a single line change, and you
+  can point it at paid models from <https://openrouter.ai/models>.
+* The prompt is `src/main/resources/rouge/system_prompt.txt`, which holds the teacher persona
+  and the build directive protocol. It loads from resources, so editing it needs no recompile.
+* The sample lesson is `src/main/resources/rouge/sample_solution.json`.
+* The difficulty fractions and ghost transparency live in `build/Difficulty.java`, which holds
+  the hide fractions for each level, and `render/GhostRenderer.java`, which holds `GHOST_ALPHA`.
 
 ## Architecture
 
-The AI never touches the world directly. It emits a **build directive** inside a
-` ```rougebuild ` fence; the mod resolves that into a `StepPlan` (a list of steps, each with
-cumulative block data), confirms with the player, and renders it. `BuildSpec` is the shared
-contract (a list of `{x,y,z,block,role}`) that the difficulty filter, ghost renderer, and
-local diff all read.
+The AI never touches the world directly. It emits a build directive inside a
+` ```rougebuild ` fence, and the mod resolves that into a `StepPlan`, which is a list of steps
+that each carry cumulative block data. The mod confirms with the player and renders it.
+`BuildSpec` is the shared contract, a list of `{x,y,z,block,role}` entries that the difficulty
+filter, ghost renderer, and local diff all read.
 
-| Package | Responsibility |
-| --- | --- |
-| `ai/` | Reusable OpenRouter chat client (no Minecraft imports) |
-| `prompt/` | Loads the swappable system prompt |
-| `build/` | `CircuitLibrary` + `CircuitPrimitive` (the build database), `StepPlan`/`BlockEntry`, `BuildSpec`, `Difficulty`, `BuildDiff`, `WorldPlacer`, and `BuildDirective` (resolves retrieve / compose / custom directives) |
-| `render/` | `GhostRenderer` — draws the translucent step hologram + outlines via Fabric `WorldRenderEvents` |
-| `teach/` | `StepSession` (active build state, anchor, per-step advance), `LessonManager` (active lesson + difficulty), `ProactiveTutor` (local nudges + auto-advance) |
-| `session/` | `RougeSession` chat state machine (chat → confirm → build) + `Affirmation` yes/no parser |
-| `chat/` | Chat interception (`ALLOW_CHAT`) + local chat output |
-| `command/` | `/rouge` command + subcommands |
+* `ai/` holds a reusable OpenRouter chat client with no Minecraft imports.
+* `prompt/` loads the swappable system prompt.
+* `build/` holds `CircuitLibrary` and `CircuitPrimitive` as the build database, plus
+  `StepPlan`, `BlockEntry`, `BuildSpec`, `Difficulty`, `BuildDiff`, `WorldPlacer`, and
+  `BuildDirective`, which resolves retrieve, compose, and custom directives.
+* `render/` holds `GhostRenderer`, which draws the translucent step hologram and outlines
+  through Fabric `WorldRenderEvents`.
+* `teach/` holds `StepSession` for active build state, the anchor, and advancing each step,
+  `LessonManager` for the active lesson and difficulty, and `ProactiveTutor` for local nudges
+  and advancing on its own.
+* `session/` holds the `RougeSession` chat state machine that moves from chat to confirm to
+  build, plus the `Affirmation` yes or no parser.
+* `chat/` holds chat interception through `ALLOW_CHAT` and local chat output.
+* `command/` holds the `/rouge` command and its subcommands.
 
-`render/GhostRenderer` needs no external mod: it renders real block models forced to a low
-alpha (so a ghost block is obviously distinct from one you've placed), plus a green outline on
+`render/GhostRenderer` needs no external mod. It renders real block models forced to a low
+alpha, so a ghost block is obviously distinct from one you have placed, plus a green outline on
 the blocks to place this step and a faint blue outline on the rest.
