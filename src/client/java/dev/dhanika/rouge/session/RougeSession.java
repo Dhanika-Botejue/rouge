@@ -1,5 +1,9 @@
 package dev.dhanika.rouge.session;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import dev.dhanika.rouge.ai.ChatMessage;
 import dev.dhanika.rouge.ai.OpenRouterClient;
 import dev.dhanika.rouge.ai.OpenRouterConfig;
@@ -8,11 +12,14 @@ import dev.dhanika.rouge.build.BuildDirective;
 import dev.dhanika.rouge.build.CircuitLibrary;
 import dev.dhanika.rouge.build.CircuitPrimitive;
 import dev.dhanika.rouge.build.PlanningOutline;
+import dev.dhanika.rouge.build.SignalTracer;
 import dev.dhanika.rouge.build.StepPlan;
+import dev.dhanika.rouge.build.WorldPlacer;
 import dev.dhanika.rouge.chat.ChatDisplay;
-import dev.dhanika.rouge.render.ThinkingHud;
 import dev.dhanika.rouge.prompt.SystemPrompts;
 import dev.dhanika.rouge.render.GhostRenderer;
+import dev.dhanika.rouge.render.ThinkingHud;
+import dev.dhanika.rouge.teach.LessonManager;
 import dev.dhanika.rouge.teach.StepSession;
 import dev.dhanika.rouge.ui.CircuitBrowserScreen;
 import net.minecraft.client.Minecraft;
@@ -56,6 +63,16 @@ public final class RougeSession {
     private static final Pattern FENCE =
             Pattern.compile("```(?:rougebuild|stepplan)\\s*\\n([\\s\\S]*?)\\n?```", Pattern.DOTALL);
 
+    // Matches rougefix fences — a small list of blocks at absolute world coordinates.
+    private static final Pattern FIX_FENCE =
+            Pattern.compile("```rougefix\\s*\\n([\\s\\S]*?)\\n?```", Pattern.DOTALL);
+
+    // Phrases that mean "apply the pending fix now".
+    private static final Pattern FIX_INTENT = Pattern.compile(
+            "\\b(fix it|fix this|apply|apply the fix|apply fix|auto.?fix|just fix|please fix|"
+            + "fix the (issue|problem|error|mistake|bug)|correct it|repair it|patch it)\\b",
+            Pattern.CASE_INSENSITIVE);
+
     // Matches rougeplanning fences and captures the JSON body.
     private static final Pattern PLANNING_FENCE =
             Pattern.compile("```rougeplanning\\s*\\n([\\s\\S]*?)\\n?```", Pattern.DOTALL);
@@ -98,6 +115,25 @@ public final class RougeSession {
     // (no build verb) still flow to the AI as normal redstone Q&A.
     private static final Pattern BUILD_VERBS = Pattern.compile(
             "\\b(build|rebuild|make|create|construct|assemble|wire)\\b", Pattern.CASE_INSENSITIVE);
+
+    // Phrases that indicate the player wants to debug their current build rather than ask a
+    // general redstone question. When matched with an active lesson, a live signal trace is
+    // injected into the AI request so it can pinpoint the exact issue.
+    private static final Pattern DEBUG_REQUEST = Pattern.compile(
+            "\\b(why|what'?s wrong|what went wrong|doesn'?t work|don'?t work|not working|isn'?t working|"
+            + "won'?t work|broken|debug|diagnose|trace|fix it|figure out|what'?s the issue|what is wrong|"
+            + "not firing|not extending|not retracting|not powering|not lit|not lighting|"
+            + "signal not|no signal|why is it|why isn'?t|why doesn'?t|why won'?t|why can'?t)\\b",
+            Pattern.CASE_INSENSITIVE);
+
+    // Set to true for one AI dispatch when the player asks a debug question with an active
+    // lesson — causes the signal trace to be injected into the request.
+    private static boolean pendingDebugTrace = false;
+
+    // Blocks proposed by a rougefix fence, held until the player says "fix it".
+    // Coordinates are absolute world coords so WorldPlacer uses BlockPos.ZERO as anchor.
+    private static List<BlockEntry> pendingFix = null;
+    private static String pendingFixDesc = null;
     private static final List<ChatMessage> history = new ArrayList<>();
 
     private RougeSession() {}
@@ -239,6 +275,9 @@ public final class RougeSession {
         repairAttempts = 0;
         awaitingStitch = false;
         primedInteractive = false;
+        pendingDebugTrace = false;
+        pendingFix = null;
+        pendingFixDesc = null;
         lastQuery = "";
         history.clear();
         StepSession.reset();
@@ -254,6 +293,9 @@ public final class RougeSession {
         repairAttempts = 0;
         awaitingStitch = false;
         primedInteractive = false;
+        pendingDebugTrace = false;
+        pendingFix = null;
+        pendingFixDesc = null;
         lastQuery = "";
         history.clear();
     }
@@ -290,6 +332,24 @@ public final class RougeSession {
      * precedence for one message so the AI planning flow still works.
      */
     private static void handleChat(String text) {
+        // A pending fix proposed by the AI waits here for explicit confirmation.
+        if (pendingFix != null) {
+            Affirmation aff = Affirmation.of(text);
+            if (looksLikeFixRequest(text) || aff == Affirmation.YES) {
+                applyPendingFix();
+                return;
+            }
+            if (aff == Affirmation.NO) {
+                pendingFix = null;
+                pendingFixDesc = null;
+                ChatDisplay.system("Fix discarded. Ask me anything else.");
+                return;
+            }
+            // Any real question clears the stale fix and falls through to the AI.
+            pendingFix = null;
+            pendingFixDesc = null;
+        }
+
         if (primedInteractive) {
             primedInteractive = false;
             sendToAi(text);
@@ -298,6 +358,11 @@ public final class RougeSession {
         if (looksLikeBuildRequest(text)) {
             CircuitBrowserScreen.open(extractTopic(text));
             return;
+        }
+        // Outside a build: only pull in the world scan when the player is explicitly
+        // asking about a problem (not every casual redstone question).
+        if (looksLikeDebugRequest(text)) {
+            pendingDebugTrace = true;
         }
         sendToAi(text);
     }
@@ -473,6 +538,12 @@ public final class RougeSession {
             StepSession.recenter(); // re-place the hologram without bothering the AI
             return;
         }
+        // Check for fix intent before the YES/NO affirmation switch so "fix it" never
+        // accidentally advances the step or stops the build.
+        if (looksLikeFixRequest(text) || (pendingFix != null && Affirmation.of(text) == Affirmation.YES)) {
+            applyPendingFix();
+            return;
+        }
         switch (Affirmation.of(text)) {
             case YES -> {
                 StepSession.Advance result = StepSession.next();
@@ -481,10 +552,91 @@ public final class RougeSession {
                 }
             }
             case NO -> {
+                if (pendingFix != null) {
+                    // "no" when a fix is pending — discard the fix, keep the build running.
+                    pendingFix = null;
+                    pendingFixDesc = null;
+                    ChatDisplay.system("Fix discarded. Keep building — I'll auto-advance when each step is done.");
+                    return;
+                }
                 StepSession.stop();
                 mode = Mode.CHAT;
             }
-            case OTHER -> sendToAi(text); // a real question mid-build — stay in BUILDING
+            case OTHER -> sendToAi(text); // stay in BUILDING; world scan is always injected
+        }
+    }
+
+    /** True when the message sounds like a debugging request about the current circuit's behavior. */
+    private static boolean looksLikeDebugRequest(String text) {
+        return DEBUG_REQUEST.matcher(text).find();
+    }
+
+    /** True when the player is asking Rouge to apply a proposed fix. */
+    private static boolean looksLikeFixRequest(String text) {
+        return FIX_INTENT.matcher(text).find();
+    }
+
+    /**
+     * Parses a {@code rougefix} JSON body and stores the result in {@link #pendingFix}.
+     * Coordinates in the fence are absolute world coords; {@link WorldPlacer} uses
+     * {@link BlockPos#ZERO} as the anchor so they are placed exactly where the AI said.
+     */
+    private static void parseFix(String json) {
+        JsonObject obj = JsonParser.parseString(json).getAsJsonObject();
+        pendingFixDesc = obj.has("desc") ? obj.get("desc").getAsString() : null;
+        List<BlockEntry> blocks = new ArrayList<>();
+        JsonArray arr = obj.getAsJsonArray("blocks");
+        for (JsonElement el : arr) {
+            JsonObject b = el.getAsJsonObject();
+            blocks.add(new BlockEntry(b.get("x").getAsInt(), b.get("y").getAsInt(),
+                    b.get("z").getAsInt(), b.get("block").getAsString()));
+        }
+        pendingFix = blocks;
+    }
+
+    /**
+     * Applies the pending fix from the last {@code rougefix} fence, or falls back to
+     * completing the active build when no specific fix is pending.
+     */
+    private static void applyPendingFix() {
+        if (pendingFix != null && !pendingFix.isEmpty()) {
+            if (!WorldPlacer.isAvailable()) {
+                ChatDisplay.error("Auto-fix only works in singleplayer — place the blocks manually.");
+                pendingFix = null;
+                pendingFixDesc = null;
+                return;
+            }
+            // Rewrite each fix block to the logical block for its position: the solution's exact
+            // block where one is known, and dust in place of any stray redstone_block. This is
+            // what corrects a model that proposed a redstone_block where redstone dust belongs.
+            List<BlockEntry> fix = SignalTracer.normalizeFixToSolution(
+                    pendingFix, LessonManager.solution(), LessonManager.anchor());
+            // Safety: reject fixes that introduce permanent power sources or blocks outside the design.
+            if (!SignalTracer.isSafeFixForSolution(fix, LessonManager.solution(), LessonManager.anchor())) {
+                ChatDisplay.error("Fix cancelled — it would permanently alter the circuit (e.g. add a redstone block or replace a component). I'll explain the correct wiring instead.");
+                pendingFix = null;
+                pendingFixDesc = null;
+                return;
+            }
+            int count = fix.size();
+            // ZERO anchor: x/y/z in the fix are absolute world coordinates from the signal trace.
+            WorldPlacer.placeStepBlocks(fix, BlockPos.ZERO);
+            String desc = (pendingFixDesc != null && !pendingFixDesc.isBlank())
+                    ? " — " + pendingFixDesc : "";
+            ChatDisplay.system("Fixed: placed " + count + " block" + (count == 1 ? "" : "s") + desc + ".");
+            pendingFix = null;
+            pendingFixDesc = null;
+            return;
+        }
+        // No specific fix pending — complete the active build if one is running.
+        if (mode == Mode.BUILDING && LessonManager.solution() != null) {
+            if (!WorldPlacer.isAvailable()) {
+                ChatDisplay.error("Auto-fix only works in singleplayer.");
+                return;
+            }
+            LessonManager.placeSolution();
+        } else {
+            ChatDisplay.system("No fix ready yet — ask me why something isn't working first, then say \"fix it\".");
         }
     }
 
@@ -532,6 +684,22 @@ public final class RougeSession {
                         ctx + " Answer their question concisely; do NOT emit a new build unless they ask to change the design."));
             }
         }
+        // Always inject the signal path trace so the AI has exact coordinates, a diagnosed
+        // break point, and a simulated fix result — regardless of mode or phrasing.
+        String signalTrace = SignalTracer.traceSignalPath();
+        if (!signalTrace.isBlank()) {
+            request.add(ChatMessage.system(signalTrace));
+        }
+        // For explicit debug questions, also inject the solution comparison trace.
+        if (pendingDebugTrace) {
+            pendingDebugTrace = false;
+            String lessonCtx = LessonManager.tutorContext(lastQuery);
+            if (lessonCtx != null) {
+                request.add(ChatMessage.system(lessonCtx));
+                String solutionTrace = SignalTracer.trace(LessonManager.solution(), LessonManager.anchor());
+                if (!solutionTrace.isBlank()) request.add(ChatMessage.system(solutionTrace));
+            }
+        }
         if (mode == Mode.PLANNING && pendingOutline != null) {
             request.add(ChatMessage.system(
                     "ACTIVE PLANNING: " + pendingOutline.circuit() + ". The player is reviewing and refining the "
@@ -570,7 +738,29 @@ public final class RougeSession {
         }
         reply = THINK_BLOCK.matcher(reply).replaceAll("").trim();
 
-                // Check for a planning outline fence first (takes priority over build fences).
+        // rougefix fence: a targeted block fix proposed by the AI from the signal trace.
+        // Held as pendingFix until the player says "fix it"; stripped from displayed text.
+        Matcher fm = FIX_FENCE.matcher(reply);
+        if (fm.find()) {
+            String fixJson = fm.group(1).trim();
+            String chatPart = FIX_FENCE.matcher(reply).replaceAll("").trim();
+            try {
+                parseFix(fixJson);
+                history.add(ChatMessage.assistant(chatPart.isEmpty() ? "[fix proposal]" : chatPart));
+                if (!chatPart.isEmpty()) ChatDisplay.print(chatPart);
+                int count = pendingFix != null ? pendingFix.size() : 0;
+                ChatDisplay.system("Rouge has a " + count + "-block fix ready. Say \"fix it\" to apply"
+                        + (WorldPlacer.isAvailable() ? "" : " (singleplayer only)")
+                        + ", or \"no\" to skip.");
+            } catch (Exception e) {
+                LOGGER.warn("[Rouge] Failed to parse rougefix: {}", e.getMessage(), e);
+                history.add(ChatMessage.assistant(reply));
+                ChatDisplay.print(reply);
+            }
+            return;
+        }
+
+        // Check for a planning outline fence first (takes priority over build fences).
         Matcher pm = PLANNING_FENCE.matcher(reply);
         if (pm.find() && mode != Mode.BUILDING) {
             String outlineJson = pm.group(1).trim();

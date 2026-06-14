@@ -7,14 +7,22 @@ import dev.dhanika.rouge.build.BuildSpec;
 import dev.dhanika.rouge.build.BuildSpec.BlockEntry;
 import dev.dhanika.rouge.build.Difficulty;
 import dev.dhanika.rouge.build.Difficulty.Level;
+import dev.dhanika.rouge.build.SignalTracer;
 import dev.dhanika.rouge.build.WorldPlacer;
 import dev.dhanika.rouge.chat.ChatDisplay;
 import dev.dhanika.rouge.render.GhostRenderer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 
 /**
  * Single source of truth for the active lesson: the full solution, the world anchor it lines
@@ -108,6 +116,16 @@ public final class LessonManager {
      * no lesson is loaded. Recomputed each call so the diff is always current.
      */
     public static String tutorContext() {
+        return tutorContext(null);
+    }
+
+    /**
+     * Same as {@link #tutorContext()} but ranks the player's mistakes by how closely each
+     * matches what they just described ({@code playerQuery}) — the component they named, the
+     * block they're looking at, and proximity to them — so the most relevant mismatch is
+     * flagged PRIMARY and the AI fixes THAT one rather than an arbitrary mismatch.
+     */
+    public static String tutorContext(String playerQuery) {
         if (solution == null) {
             return null;
         }
@@ -130,17 +148,100 @@ public final class LessonManager {
             sb.append("PROGRESS: ").append(report.correct()).append('/').append(report.total())
                     .append(" correct, ").append(report.wrong().size()).append(" wrong, ")
                     .append(report.missing()).append(" still to place.\n");
+            List<Mismatch> ranked = rankByRelevance(report.wrong(), playerQuery);
             int m = 0;
-            for (Mismatch mm : report.wrong()) {
-                sb.append("MISTAKE: at ").append(mm.pos().getX()).append(',').append(mm.pos().getY()).append(',')
+            for (Mismatch mm : ranked) {
+                sb.append(m == 0
+                        ? "PRIMARY MISTAKE (closest to what the player described — fix THIS one): at "
+                        : "MISTAKE: at ");
+                sb.append(mm.pos().getX()).append(',').append(mm.pos().getY()).append(',')
                         .append(mm.pos().getZ()).append(" placed ").append(mm.found())
-                        .append(" but the solution wants ").append(mm.expected()).append('\n');
+                        .append(" but the solution wants ").append(mm.expected())
+                        .append(" — fix it by replacing that block with ").append(mm.expected())
+                        .append(" (use the solution's exact block; never swap in a redstone_block for "
+                                + "redstone_wire/dust).\n");
                 if (++m >= 5) {
                     break;
                 }
             }
+            if (!ranked.isEmpty()) {
+                sb.append("When you emit a rougefix, correct the PRIMARY MISTAKE first and use the EXACT block "
+                        + "the solution lists for that position.\n");
+            }
         }
         return sb.toString();
+    }
+
+    /** Tokens too generic to indicate which component the player meant. */
+    private static final Set<String> GENERIC_TOKENS = Set.of(
+            "redstone", "minecraft", "block", "wall", "floor");
+
+    /**
+     * Orders mismatches most-relevant-first. Relevance combines: whether the player's message
+     * named the block involved (strongest), how near the mismatch is to the block under their
+     * crosshair, and how near it is to the player (tiebreak).
+     */
+    private static List<Mismatch> rankByRelevance(List<Mismatch> wrong, String query) {
+        if (wrong.size() <= 1) {
+            return wrong;
+        }
+        Minecraft mc = Minecraft.getInstance();
+        BlockPos look = (mc.hitResult instanceof BlockHitResult bhr && bhr.getType() == HitResult.Type.BLOCK)
+                ? bhr.getBlockPos() : null;
+        BlockPos eye = mc.player != null ? mc.player.blockPosition() : null;
+        List<Mismatch> sorted = new ArrayList<>(wrong);
+        sorted.sort(Comparator.comparingDouble((Mismatch mm) -> -relevanceScore(mm, query, look, eye)));
+        return sorted;
+    }
+
+    private static double relevanceScore(Mismatch mm, String query, BlockPos look, BlockPos eye) {
+        double score = 0;
+        if (queryMentions(query, mm.expected()) || queryMentions(query, mm.found())) {
+            score += 1000; // the player named this component
+        }
+        if (look != null) {
+            double d = Math.sqrt(look.distSqr(mm.pos()));
+            if (d <= 1.5) {
+                score += 500; // their crosshair is on the broken block
+            }
+            score += Math.max(0, 50 - d * 5); // nearer the crosshair ranks higher
+        }
+        if (eye != null) {
+            score += Math.max(0, 30 - Math.sqrt(eye.distSqr(mm.pos()))); // nearer the player (tiebreak)
+        }
+        return score;
+    }
+
+    /** True when {@code query} appears to name the component identified by {@code blockId}. */
+    private static boolean queryMentions(String query, String blockId) {
+        if (query == null || query.isBlank()) {
+            return false;
+        }
+        String q = query.toLowerCase(Locale.ROOT);
+        for (String tok : shortName(blockId).split("[ _]")) {
+            if (tok.length() >= 3 && !GENERIC_TOKENS.contains(tok) && q.contains(tok)) {
+                return true;
+            }
+        }
+        // Common synonyms players use that don't appear verbatim in the block id.
+        if (blockId.contains("redstone_wire") && (q.contains("dust") || q.contains("wire"))) return true;
+        if (blockId.contains("redstone_lamp") && (q.contains("lamp") || q.contains("light"))) return true;
+        if (blockId.contains("redstone_torch") && q.contains("torch")) return true;
+        if (blockId.contains("redstone_block") && q.contains("redstone block")) return true;
+        return false;
+    }
+
+    /**
+     * Full diagnostic context for a "why isn't this working?" question: the tutor context
+     * (solution + progress) combined with a live signal trace from {@link SignalTracer}.
+     * Returns null when no lesson is loaded.
+     */
+    public static String debugContext() {
+        if (solution == null || anchor == null) return null;
+        String tutor = tutorContext();
+        String trace = SignalTracer.trace(solution, anchor);
+        if (tutor == null) return null;
+        return trace.isBlank() ? tutor : tutor + "\n" + trace;
     }
 
     /** Reports the learner's progress against the solution (local diff, no API). */
