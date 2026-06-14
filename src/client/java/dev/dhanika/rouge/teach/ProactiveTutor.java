@@ -5,6 +5,7 @@ import dev.dhanika.rouge.build.BuildDiff.Mismatch;
 import dev.dhanika.rouge.build.BuildDiff.Report;
 import dev.dhanika.rouge.build.BuildSpec;
 import dev.dhanika.rouge.chat.ChatDisplay;
+import dev.dhanika.rouge.session.RougeSession;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -40,6 +41,11 @@ public final class ProactiveTutor {
             return;
         }
         ticks = 0;
+
+        // Don't auto-advance steps or nudge while Rouge is answering a question — keeps the hologram frozen.
+        if (RougeSession.isAwaitingReply()) {
+            return;
+        }
 
         BuildSpec solution = LessonManager.solution();
         BlockPos anchor = LessonManager.anchor();

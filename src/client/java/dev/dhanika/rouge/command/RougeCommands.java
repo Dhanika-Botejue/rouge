@@ -52,16 +52,6 @@ public final class RougeCommands {
                                     StepSession.showCurrent();
                                     return 1;
                                 }))
-                        .then(ClientCommandManager.literal("btw")
-                                .then(ClientCommandManager.argument("question", StringArgumentType.greedyString())
-                                        .executes(ctx -> {
-                                            RougeSession.askAboutSteps(StringArgumentType.getString(ctx, "question"));
-                                            return 1;
-                                        }))
-                                .executes(ctx -> {
-                                    ChatDisplay.system("Usage: /rouge btw <question> — ask about the build steps in plain language.");
-                                    return 1;
-                                }))
                         .then(ClientCommandManager.literal("move")
                                 .executes(ctx -> {
                                     StepSession.recenter();
@@ -70,6 +60,16 @@ public final class RougeCommands {
                         .then(ClientCommandManager.literal("stop")
                                 .executes(ctx -> {
                                     StepSession.stop();
+                                    return 1;
+                                }))
+                        .then(ClientCommandManager.literal("btw")
+                                .then(ClientCommandManager.argument("question", StringArgumentType.greedyString())
+                                        .executes(ctx -> {
+                                            RougeSession.askBtw(StringArgumentType.getString(ctx, "question"));
+                                            return 1;
+                                        }))
+                                .executes(ctx -> {
+                                    ChatDisplay.system("Usage: /rouge btw <question>  (shortcut: /btw <question>)");
                                     return 1;
                                 }))
                         .then(ClientCommandManager.literal("model")
