@@ -29,6 +29,24 @@ ahead or repositioning.
 | `/rouge step` | Re-show the current step's hologram. |
 | `/rouge move` | Re-place the hologram in front of where you're standing now. |
 | `/rouge stop` | Cancel the active build and clear the hologram. |
+| `/rouge materials` | Hand you the items needed for the current step's blocks (creative singleplayer). Silent if no build is active. |
+| `/rouge btw <question>` | Ask Rouge a question mid-build — it answers with full context of your current build and step, then you keep building. Shortcut: `/btw <question>`. |
+| `/rouge trace` | Print a live signal trace of the redstone around you (sources, wire power, gaps, destinations). Handy for debugging. |
+
+## Debugging
+
+| What you do | What happens |
+| --- | --- |
+| Ask "why isn't this working?" / "not firing" | Rouge runs a live signal trace + (in a lesson) a solution-vs-world comparison and diagnoses the exact fault with coordinates. |
+| Say "fix it" | If Rouge proposed a fix, it places the corrected blocks for you (singleplayer); say "no" to skip. |
+
+## Voice (ElevenLabs)
+
+| Command | What it does |
+| --- | --- |
+| `/rouge voice` | Show whether voice is available and on/off. |
+| `/rouge voice on` | Speak Rouge's replies, step instructions, and praise aloud. Needs `ELEVENLABS_API_KEY` in `.env`. |
+| `/rouge voice off` | Mute spoken lines (chat text is unaffected). |
 
 ## Difficulty
 

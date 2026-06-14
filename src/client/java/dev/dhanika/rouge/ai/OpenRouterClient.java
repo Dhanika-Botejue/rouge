@@ -89,6 +89,7 @@ public final class OpenRouterClient {
         String next = (attempt + 1 < chain.size()) ? chain.get(attempt + 1) : null;
         return sendRaw(model, messages, Duration.ofSeconds(30))
                 .thenCompose(response -> {
+                    logRateLimit(model, response);
                     int status = response.statusCode();
                     if (status != 200) {
                         // Any failure — no endpoint, rate limit, unavailable — try next.
@@ -115,6 +116,41 @@ public final class OpenRouterClient {
             onStatus.accept(line);
         } catch (Exception ignored) {
             // A misbehaving status sink must never break the request flow.
+        }
+    }
+
+    /**
+     * Logs the model's current rate-limit status to the terminal (dev console) only — never the
+     * in-game chat. OpenRouter returns these as {@code X-RateLimit-*} response headers; not every
+     * upstream provider sends them, so this is best-effort and silent when they're absent.
+     */
+    private void logRateLimit(String model, HttpResponse<?> response) {
+        var headers = response.headers();
+        var remaining = headers.firstValue("x-ratelimit-remaining");
+        var limit = headers.firstValue("x-ratelimit-limit");
+        var reset = headers.firstValue("x-ratelimit-reset");
+        if (remaining.isEmpty() && limit.isEmpty()) {
+            return; // this provider didn't report rate-limit headers
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("rate limit [").append(model).append("]: ")
+                .append(remaining.orElse("?")).append('/').append(limit.orElse("?")).append(" remaining");
+        reset.flatMap(OpenRouterClient::formatReset)
+                .ifPresent(when -> sb.append(", resets ").append(when));
+        if (response.statusCode() == 429) {
+            sb.append(" — HTTP 429 (limited right now)");
+        }
+        LOGGER.info("[Rouge] {}", sb);
+    }
+
+    /** OpenRouter's reset header is a Unix-epoch milliseconds value; render it as "in Ns". */
+    private static java.util.Optional<String> formatReset(String reset) {
+        try {
+            long resetMs = Long.parseLong(reset.trim());
+            long secs = Math.max(0, (resetMs - System.currentTimeMillis()) / 1000);
+            return java.util.Optional.of(secs == 0 ? "now" : "in " + secs + "s");
+        } catch (NumberFormatException e) {
+            return java.util.Optional.empty();
         }
     }
 

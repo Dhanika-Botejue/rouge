@@ -45,6 +45,32 @@ public final class StepSession {
         return plan != null;
     }
 
+    /** 1-based index of the step currently shown, or 0 if no build is active. */
+    public static int activeStepNumber() {
+        return plan == null ? 0 : stepIndex + 1;
+    }
+
+    /** Total number of steps in the active build, or 0 if none. */
+    public static int activeStepTotal() {
+        return plan == null ? 0 : plan.steps().size();
+    }
+
+    /** Blocks newly placed in the current step (not cumulative from prior steps). */
+    public static List<BlockEntry> activeStepBlocks() {
+        return plan == null ? List.of() : blocksAddedThisStep();
+    }
+
+    /** Every block in the finished build (the final cumulative step), or empty if no build. */
+    public static List<BlockEntry> activeAllBlocks() {
+        if (plan == null || plan.steps().isEmpty()) return List.of();
+        return plan.steps().get(plan.steps().size() - 1).blocks();
+    }
+
+    /** Name of the circuit currently being built, or empty if none. */
+    public static String activeCircuit() {
+        return plan == null ? "" : plan.circuit();
+    }
+
     /** Begins a build: anchors it in front of the player and shows step 1. */
     public static void start(StepPlan p) {
         int total = p.steps().size();
@@ -146,7 +172,7 @@ public final class StepSession {
      */
     public static void onStepComplete() {
         if (plan == null) return;
-        ChatDisplay.system("Great job! ✔");
+        ChatDisplay.praise("Great job! ✔");
         next();
     }
 
@@ -188,7 +214,7 @@ public final class StepSession {
 
         ChatDisplay.system("Step " + (stepIndex + 1) + "/" + total + ": " + step.title());
         if (!step.explanation().isBlank()) {
-            ChatDisplay.print(step.explanation());
+            ChatDisplay.step(step.explanation());
         }
         int hidden = stepSpec.blocks().size() - shownSpec.size();
         if (hidden > 0) {
