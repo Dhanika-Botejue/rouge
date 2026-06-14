@@ -8,9 +8,9 @@ mod required. As you place each step's blocks correctly, Rouge detects it locall
 "Great job!", and **advances on its own**.
 
 1. **Ask** - `/rouge`, then "build me a 2x2 piston door" or "teach me an RS latch".
-2. **Rouge proposes a build** — it either **retrieves** a matching build from its library or
+2. **Rouge proposes a build** - it either **retrieves** a matching build from its library or
    **composes** a bigger one out of known parts, and asks you to confirm.
-3. **Build it step by step** — say **yes** and Rouge anchors a translucent ghost preview in
+3. **Build it step by step** - say **yes** and Rouge anchors a translucent ghost preview in
    front of you, glowing the blocks to place *this* step and explaining *why*. Place them and
    the next step appears automatically. Repeat until it's done.
 
@@ -30,7 +30,7 @@ Set how much of each step the hologram reveals with `/rouge level`:
 Hidden blocks are still part of the build: you must place them correctly for the step to
 complete and advance. Rouge biases hiding toward wiring/logic first and keeps inputs/outputs
 visible longest, so the visible scaffold stays meaningful. Hidden or not, Rouge flags wrong
-placements automatically (computed locally — no API calls).
+placements automatically (computed locally, so no API calls).
 
 ## Commands
 
@@ -47,7 +47,7 @@ placements automatically (computed locally — no API calls).
 | `/rouge check` | Report your progress vs. the solution |
 | `/rouge model [id]` | Show or switch the chat model |
 
-During a session you mostly just **talk** — "yes", "no", "next", and "move" drive the flow,
+During a session you mostly just **talk**: "yes", "no", "next", and "move" drive the flow,
 so the commands are optional shortcuts. See [`ROUGE-COMMANDS.md`](ROUGE-COMMANDS.md) for the
 full reference.
 
@@ -58,7 +58,7 @@ Rouge ships a library of redstone builds under `src/main/resources/rouge/circuit
 - **Buildable primitives** with verified, hand-authored block data — logic gates, latches,
   clocks, pulse circuits, piston push, a redstone lamp. These are retrieved or stitched
   together verbatim, so the hologram is always correct.
-- **Blueprint builds** — described in detail but generated on demand — flying machines,
+- **Blueprint builds**: described in detail but generated on demand: flying machines,
   2x2 / 3x3 piston doors, TNT dupers and cannons, item elevators and sorters, auto farms,
   hidden staircases, and more. Rouge composes these from primitives or generates a build that
   follows the blueprint.
@@ -75,7 +75,7 @@ To add a build, drop a new JSON file in that folder and add its id to `IDS` in
 - An **OpenRouter API key** — sign in at <https://openrouter.ai>, open **Keys**, and create
   one. Free models work without paid credits.
 
-No extra Minecraft mods are needed — the hologram is rendered by Rouge itself.
+No extra Minecraft mods are needed. The hologram is rendered by Rouge itself.
 
 ## Setup
 
@@ -98,7 +98,7 @@ your JDK ends up at a different path, update that one line in `gradle.properties
 
 ### 2. Add your OpenRouter API key
 
-Put the key in a `.env` file at the project root. This file is **gitignored — never commit
+Put the key in a `.env` file at the project root. This file is **gitignored - never commit
 it**:
 
 ```sh
