@@ -2,190 +2,1163 @@
   "id": "piston-door-2x2",
   "title": "2x2 Piston Door",
   "category": "door",
-  "description": "A compact 2x2 sliding door. Four sticky pistons surround a 2-wide, 2-tall gap: two below the gap face UP and two above it face DOWN. When powered they all extend and their heads fill the four opening blocks (closed); cut the power and the sticky heads retract, clearing the gap (open). One lever drives all four through a redstone line that climbs the back of the wall, so a single flip opens and closes the whole door.",
-  "aliases": ["2x2 door", "piston door", "hidden door", "redstone door"],
-  "inputs": ["lever"],
+  "description": "A compact 2x2 sliding door built from four sticky pistons. Two pistons above the opening face down and two below face up; when powered they each shove a stone block into the 2x2 gap (door closed), and when the power is cut their sticky heads pull those blocks back out (door open). A single lever drives all four pistons through a redstone line that climbs the back of the wall, so one flip opens or closes the whole door.",
+  "aliases": [
+    "2x2 door",
+    "piston door",
+    "hidden door",
+    "redstone door"
+  ],
+  "inputs": [
+    "lever"
+  ],
   "outputs": [],
-  "footprint": "6x6x5",
+  "footprint": "6x7x6",
   "steps": [
     {
-      "title": "Build the doorway frame",
-      "explanation": "Make a wall in the z=2 plane with a 2-wide (x=2,3), 2-tall (y=2,3) hole in the middle — that hole is the doorway. The frame around it is just solid blocks; the gap is left empty for now.",
+      "title": "Build the wall and back supports",
+      "explanation": "Lay the stone wall with a 2-wide, 2-tall hole in the middle — that hole is the doorway. Leave the four spots just above and just below the hole empty for now; the pistons go there next. The extra stone running up the back is the staircase that the redstone signal will climb, so place those blocks too.",
       "blocks": [
-        {"x":1,"y":0,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":1,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":2,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":3,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":4,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":5,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":0,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":1,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":2,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":3,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":4,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":5,"z":2,"block":"minecraft:stone"},
-        {"x":2,"y":0,"z":2,"block":"minecraft:stone"},
-        {"x":3,"y":0,"z":2,"block":"minecraft:stone"},
-        {"x":2,"y":5,"z":2,"block":"minecraft:stone"},
-        {"x":3,"y":5,"z":2,"block":"minecraft:stone"}
+        {
+          "x": 1,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 3,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 3,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "z": 3,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "z": 4,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 4,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "z": 3,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "z": 4,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "z": 5,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 4,
+          "z": 5,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 5,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 5,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 6,
+          "z": 1,
+          "block": "minecraft:stone"
+        }
       ]
     },
     {
       "title": "Place the four sticky pistons",
-      "explanation": "The two pistons under the gap (y=1) face UP; the two above the gap (y=4) face DOWN. Facing matters — a piston facing the wrong way won't fill the doorway, so match the hologram exactly. When they extend, their heads land in the four opening blocks (2,2,2),(3,2,2),(2,3,2),(3,3,2).",
+      "explanation": "Two sticky pistons go below the opening facing UP, and two go above it facing DOWN. Facing matters \u2014 match the hologram exactly. When they fire, the bottom pair pushes a block up into the lower row of the doorway and the top pair pushes a block down into the upper row, together filling all four blocks of the gap.",
       "blocks": [
-        {"x":1,"y":0,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":1,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":2,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":3,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":4,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":5,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":0,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":1,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":2,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":3,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":4,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":5,"z":2,"block":"minecraft:stone"},
-        {"x":2,"y":0,"z":2,"block":"minecraft:stone"},
-        {"x":3,"y":0,"z":2,"block":"minecraft:stone"},
-        {"x":2,"y":5,"z":2,"block":"minecraft:stone"},
-        {"x":3,"y":5,"z":2,"block":"minecraft:stone"},
-        {"x":2,"y":1,"z":2,"block":"minecraft:sticky_piston[facing=up,extended=false]"},
-        {"x":3,"y":1,"z":2,"block":"minecraft:sticky_piston[facing=up,extended=false]"},
-        {"x":2,"y":4,"z":2,"block":"minecraft:sticky_piston[facing=down,extended=false]"},
-        {"x":3,"y":4,"z":2,"block":"minecraft:sticky_piston[facing=down,extended=false]"}
+        {
+          "x": 1,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 3,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 3,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "z": 3,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "z": 4,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 4,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "z": 3,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "z": 4,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "z": 5,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 4,
+          "z": 5,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 5,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 5,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 6,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 1,
+          "block": "minecraft:sticky_piston[extended=false,facing=up]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 1,
+          "block": "minecraft:sticky_piston[extended=false,facing=up]"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 1,
+          "block": "minecraft:sticky_piston[extended=false,facing=down]"
+        },
+        {
+          "x": 2,
+          "y": 5,
+          "z": 1,
+          "block": "minecraft:sticky_piston[extended=false,facing=down]"
+        }
       ]
     },
     {
-      "title": "Add redstone behind each piston",
-      "explanation": "Place a stone block behind each piston (z=3) and a dot of redstone dust on top of it, right beside the piston. Dust touching a piston powers it. Two dots sit at the bottom pistons (y=1) and two at the top pistons (y=4).",
+      "title": "Run the redstone to all four pistons",
+      "explanation": "Place redstone dust so one signal reaches every piston. Dust sits beside the bottom pistons, climbs the staircase up the back of the wall, and lands on top of the upper pistons. Each dust tile rests on the block beneath it, and a powered block touching a piston is enough to fire it — so make sure the line is unbroken from the bottom all the way to the top.",
       "blocks": [
-        {"x":1,"y":0,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":1,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":2,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":3,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":4,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":5,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":0,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":1,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":2,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":3,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":4,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":5,"z":2,"block":"minecraft:stone"},
-        {"x":2,"y":0,"z":2,"block":"minecraft:stone"},
-        {"x":3,"y":0,"z":2,"block":"minecraft:stone"},
-        {"x":2,"y":5,"z":2,"block":"minecraft:stone"},
-        {"x":3,"y":5,"z":2,"block":"minecraft:stone"},
-        {"x":2,"y":1,"z":2,"block":"minecraft:sticky_piston[facing=up,extended=false]"},
-        {"x":3,"y":1,"z":2,"block":"minecraft:sticky_piston[facing=up,extended=false]"},
-        {"x":2,"y":4,"z":2,"block":"minecraft:sticky_piston[facing=down,extended=false]"},
-        {"x":3,"y":4,"z":2,"block":"minecraft:sticky_piston[facing=down,extended=false]"},
-        {"x":2,"y":0,"z":3,"block":"minecraft:stone"},
-        {"x":3,"y":0,"z":3,"block":"minecraft:stone"},
-        {"x":2,"y":3,"z":3,"block":"minecraft:stone"},
-        {"x":3,"y":3,"z":3,"block":"minecraft:stone"},
-        {"x":2,"y":1,"z":3,"block":"minecraft:redstone_wire"},
-        {"x":3,"y":1,"z":3,"block":"minecraft:redstone_wire"},
-        {"x":2,"y":4,"z":3,"block":"minecraft:redstone_wire"},
-        {"x":3,"y":4,"z":3,"block":"minecraft:redstone_wire"}
-      ]
-    },
-    {
-      "title": "Run the redstone line up to the top pistons",
-      "explanation": "The bottom dust (y=1) and top dust (y=4) need to share one signal. Build a little staircase of blocks up the back-right (x=4) so dust climbs from the bottom line to the top, then bring it across (x=3) and down to the top pistons' dust. Each dust tile sits on the block below it.",
-      "blocks": [
-        {"x":1,"y":0,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":1,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":2,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":3,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":4,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":5,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":0,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":1,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":2,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":3,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":4,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":5,"z":2,"block":"minecraft:stone"},
-        {"x":2,"y":0,"z":2,"block":"minecraft:stone"},
-        {"x":3,"y":0,"z":2,"block":"minecraft:stone"},
-        {"x":2,"y":5,"z":2,"block":"minecraft:stone"},
-        {"x":3,"y":5,"z":2,"block":"minecraft:stone"},
-        {"x":2,"y":1,"z":2,"block":"minecraft:sticky_piston[facing=up,extended=false]"},
-        {"x":3,"y":1,"z":2,"block":"minecraft:sticky_piston[facing=up,extended=false]"},
-        {"x":2,"y":4,"z":2,"block":"minecraft:sticky_piston[facing=down,extended=false]"},
-        {"x":3,"y":4,"z":2,"block":"minecraft:sticky_piston[facing=down,extended=false]"},
-        {"x":2,"y":0,"z":3,"block":"minecraft:stone"},
-        {"x":3,"y":0,"z":3,"block":"minecraft:stone"},
-        {"x":2,"y":3,"z":3,"block":"minecraft:stone"},
-        {"x":3,"y":3,"z":3,"block":"minecraft:stone"},
-        {"x":2,"y":1,"z":3,"block":"minecraft:redstone_wire"},
-        {"x":3,"y":1,"z":3,"block":"minecraft:redstone_wire"},
-        {"x":2,"y":4,"z":3,"block":"minecraft:redstone_wire"},
-        {"x":3,"y":4,"z":3,"block":"minecraft:redstone_wire"},
-        {"x":4,"y":0,"z":3,"block":"minecraft:stone"},
-        {"x":4,"y":1,"z":3,"block":"minecraft:redstone_wire"},
-        {"x":4,"y":1,"z":4,"block":"minecraft:stone"},
-        {"x":4,"y":2,"z":4,"block":"minecraft:redstone_wire"},
-        {"x":4,"y":2,"z":5,"block":"minecraft:stone"},
-        {"x":4,"y":3,"z":5,"block":"minecraft:redstone_wire"},
-        {"x":4,"y":3,"z":6,"block":"minecraft:stone"},
-        {"x":4,"y":4,"z":6,"block":"minecraft:redstone_wire"},
-        {"x":3,"y":3,"z":6,"block":"minecraft:stone"},
-        {"x":3,"y":4,"z":6,"block":"minecraft:redstone_wire"},
-        {"x":3,"y":3,"z":5,"block":"minecraft:stone"},
-        {"x":3,"y":4,"z":5,"block":"minecraft:redstone_wire"},
-        {"x":3,"y":3,"z":4,"block":"minecraft:stone"},
-        {"x":3,"y":4,"z":4,"block":"minecraft:redstone_wire"}
+        {
+          "x": 1,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 3,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 3,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "z": 3,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "z": 4,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 4,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "z": 3,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "z": 4,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "z": 5,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 4,
+          "z": 5,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 5,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 5,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 6,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 1,
+          "block": "minecraft:sticky_piston[extended=false,facing=up]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 1,
+          "block": "minecraft:sticky_piston[extended=false,facing=up]"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 1,
+          "block": "minecraft:sticky_piston[extended=false,facing=down]"
+        },
+        {
+          "x": 2,
+          "y": 5,
+          "z": 1,
+          "block": "minecraft:sticky_piston[extended=false,facing=down]"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 0,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 0,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "z": 0,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "z": 0,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "z": 2,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "z": 2,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "z": 3,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 3,
+          "y": 4,
+          "z": 4,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 2,
+          "y": 5,
+          "z": 3,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 2,
+          "y": 5,
+          "z": 4,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 2,
+          "y": 5,
+          "z": 5,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 3,
+          "y": 5,
+          "z": 5,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 1,
+          "y": 6,
+          "z": 1,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 2,
+          "y": 6,
+          "z": 1,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 1,
+          "y": 6,
+          "z": 2,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 2,
+          "y": 6,
+          "z": 2,
+          "block": "minecraft:redstone_wire"
+        }
       ]
     },
     {
       "title": "Place the lever and test",
-      "explanation": "Put a block behind the bottom-right dust and a lever on top of it. Flip the lever ON: all four pistons extend and their heads fill the 2x2 gap (door closed). Flip it OFF: the sticky heads retract and the doorway opens. If a piston doesn't fire, check its facing and that its dust dot is touching it.",
+      "explanation": "Add the lever onto the block feeding the redstone line. Flip it ON: all four pistons extend and their blocks fill the 2x2 gap — door closed. Flip it OFF: the sticky heads pull the blocks back and the doorway opens. If a piston doesn't fire, check its facing and that the redstone line touching it is unbroken.",
       "blocks": [
-        {"x":1,"y":0,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":1,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":2,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":3,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":4,"z":2,"block":"minecraft:stone"},
-        {"x":1,"y":5,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":0,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":1,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":2,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":3,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":4,"z":2,"block":"minecraft:stone"},
-        {"x":4,"y":5,"z":2,"block":"minecraft:stone"},
-        {"x":2,"y":0,"z":2,"block":"minecraft:stone"},
-        {"x":3,"y":0,"z":2,"block":"minecraft:stone"},
-        {"x":2,"y":5,"z":2,"block":"minecraft:stone"},
-        {"x":3,"y":5,"z":2,"block":"minecraft:stone"},
-        {"x":2,"y":1,"z":2,"block":"minecraft:sticky_piston[facing=up,extended=false]"},
-        {"x":3,"y":1,"z":2,"block":"minecraft:sticky_piston[facing=up,extended=false]"},
-        {"x":2,"y":4,"z":2,"block":"minecraft:sticky_piston[facing=down,extended=false]"},
-        {"x":3,"y":4,"z":2,"block":"minecraft:sticky_piston[facing=down,extended=false]"},
-        {"x":2,"y":0,"z":3,"block":"minecraft:stone"},
-        {"x":3,"y":0,"z":3,"block":"minecraft:stone"},
-        {"x":2,"y":3,"z":3,"block":"minecraft:stone"},
-        {"x":3,"y":3,"z":3,"block":"minecraft:stone"},
-        {"x":2,"y":1,"z":3,"block":"minecraft:redstone_wire"},
-        {"x":3,"y":1,"z":3,"block":"minecraft:redstone_wire"},
-        {"x":2,"y":4,"z":3,"block":"minecraft:redstone_wire"},
-        {"x":3,"y":4,"z":3,"block":"minecraft:redstone_wire"},
-        {"x":4,"y":0,"z":3,"block":"minecraft:stone"},
-        {"x":4,"y":1,"z":3,"block":"minecraft:redstone_wire"},
-        {"x":4,"y":1,"z":4,"block":"minecraft:stone"},
-        {"x":4,"y":2,"z":4,"block":"minecraft:redstone_wire"},
-        {"x":4,"y":2,"z":5,"block":"minecraft:stone"},
-        {"x":4,"y":3,"z":5,"block":"minecraft:redstone_wire"},
-        {"x":4,"y":3,"z":6,"block":"minecraft:stone"},
-        {"x":4,"y":4,"z":6,"block":"minecraft:redstone_wire"},
-        {"x":3,"y":3,"z":6,"block":"minecraft:stone"},
-        {"x":3,"y":4,"z":6,"block":"minecraft:redstone_wire"},
-        {"x":3,"y":3,"z":5,"block":"minecraft:stone"},
-        {"x":3,"y":4,"z":5,"block":"minecraft:redstone_wire"},
-        {"x":3,"y":3,"z":4,"block":"minecraft:stone"},
-        {"x":3,"y":4,"z":4,"block":"minecraft:redstone_wire"},
-        {"x":5,"y":0,"z":3,"block":"minecraft:stone"},
-        {"x":5,"y":1,"z":3,"block":"minecraft:lever[face=floor,facing=north,powered=false]"}
+        {
+          "x": 1,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 5,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 3,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 3,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "z": 3,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "z": 4,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 4,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 4,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "z": 3,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "z": 4,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 4,
+          "z": 5,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 4,
+          "z": 5,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 5,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 5,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 2,
+          "y": 5,
+          "z": 2,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 0,
+          "y": 6,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 3,
+          "y": 6,
+          "z": 1,
+          "block": "minecraft:stone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 1,
+          "block": "minecraft:sticky_piston[extended=false,facing=up]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 1,
+          "block": "minecraft:sticky_piston[extended=false,facing=up]"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 1,
+          "block": "minecraft:sticky_piston[extended=false,facing=down]"
+        },
+        {
+          "x": 2,
+          "y": 5,
+          "z": 1,
+          "block": "minecraft:sticky_piston[extended=false,facing=down]"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 0,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 0,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 3,
+          "y": 1,
+          "z": 0,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "z": 0,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 4,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 3,
+          "y": 2,
+          "z": 2,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 4,
+          "y": 2,
+          "z": 2,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 3,
+          "y": 3,
+          "z": 3,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 3,
+          "y": 4,
+          "z": 4,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 2,
+          "y": 5,
+          "z": 3,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 2,
+          "y": 5,
+          "z": 4,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 2,
+          "y": 5,
+          "z": 5,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 3,
+          "y": 5,
+          "z": 5,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 1,
+          "y": 6,
+          "z": 1,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 2,
+          "y": 6,
+          "z": 1,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 1,
+          "y": 6,
+          "z": 2,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 2,
+          "y": 6,
+          "z": 2,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 5,
+          "y": 2,
+          "z": 2,
+          "block": "minecraft:lever[face=floor,facing=west,powered=false]"
+        }
       ]
     }
   ]
