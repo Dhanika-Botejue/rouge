@@ -3,6 +3,7 @@ package dev.dhanika.rouge.command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import dev.dhanika.rouge.build.Difficulty;
 import dev.dhanika.rouge.chat.ChatDisplay;
+import dev.dhanika.rouge.inventory.InventoryDistributor;
 import dev.dhanika.rouge.session.RougeSession;
 import dev.dhanika.rouge.teach.LessonManager;
 import dev.dhanika.rouge.teach.StepSession;
@@ -39,6 +40,11 @@ public final class RougeCommands {
                         .then(ClientCommandManager.literal("stop")
                                 .executes(ctx -> {
                                     StepSession.stop();
+                                    return 1;
+                                }))
+                        .then(ClientCommandManager.literal("materials")
+                                .executes(ctx -> {
+                                    InventoryDistributor.giveForCurrentStep();
                                     return 1;
                                 }))
                         .then(ClientCommandManager.literal("voice")

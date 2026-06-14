@@ -29,6 +29,7 @@ ahead or repositioning.
 | `/rouge step` | Re-show the current step's hologram. |
 | `/rouge move` | Re-place the hologram in front of where you're standing now. |
 | `/rouge stop` | Cancel the active build and clear the hologram. |
+| `/rouge materials` | Hand you the items needed for the current step's blocks (creative singleplayer). Silent if no build is active. |
 
 ## Voice (ElevenLabs)
 

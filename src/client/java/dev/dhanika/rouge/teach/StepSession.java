@@ -45,6 +45,21 @@ public final class StepSession {
         return plan != null;
     }
 
+    /** 1-based index of the step currently shown, or 0 if no build is active. */
+    public static int activeStepNumber() {
+        return plan == null ? 0 : stepIndex + 1;
+    }
+
+    /** Total number of steps in the active build, or 0 if none. */
+    public static int activeStepTotal() {
+        return plan == null ? 0 : plan.steps().size();
+    }
+
+    /** Blocks newly placed in the current step (not cumulative from prior steps). */
+    public static List<BlockEntry> activeStepBlocks() {
+        return plan == null ? List.of() : blocksAddedThisStep();
+    }
+
     /** Begins a build: anchors it in front of the player and shows step 1. */
     public static void start(StepPlan p) {
         int total = p.steps().size();
