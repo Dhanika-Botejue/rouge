@@ -29,6 +29,8 @@ ahead or repositioning.
 | `/rouge step` | Re-show the current step's hologram. |
 | `/rouge move` | Re-place the hologram in front of where you're standing now. |
 | `/rouge stop` | Cancel the active build and clear the hologram. |
+| `/rouge btw <question>` | BTW coaching — rich context when a build/preview is active; works without one too. |
+| `/btw <question>` | Same as `/rouge btw` — works anytime, even with nothing placed. |
 
 ## Difficulty
 
@@ -73,4 +75,5 @@ While a `/rouge` session is open, plain chat drives the flow:
 | `yes` / `next` | Confirm / skip to the next step. |
 | `no` / `stop` | Decline / cancel the current build. |
 | `move` / `here` | Re-place the hologram where you're standing. |
-| (any other question) | Routed to the AI — you can ask questions mid-build. |
+| (any other question during a build) | Routed to Rouge as **btw coaching** — answers use what you have actually placed. |
+| `/rouge btw <question>` | Same coaching mode, explicit shortcut mid-build. |

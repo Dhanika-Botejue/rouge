@@ -4,6 +4,7 @@ import dev.dhanika.rouge.ai.OpenRouterClient;
 import dev.dhanika.rouge.ai.OpenRouterConfig;
 import dev.dhanika.rouge.chat.ChatInterceptor;
 import dev.dhanika.rouge.ai.ModelDiscovery;
+import dev.dhanika.rouge.command.BtwCommands;
 import dev.dhanika.rouge.command.RougeCommands;
 import dev.dhanika.rouge.render.GhostRenderer;
 import dev.dhanika.rouge.render.ThinkingHud;
@@ -11,7 +12,6 @@ import dev.dhanika.rouge.session.RougeSession;
 import dev.dhanika.rouge.ui.CircuitBrowserScreen;
 import dev.dhanika.rouge.teach.ProactiveTutor;
 import dev.dhanika.rouge.teach.StepSession;
-import dev.dhanika.rouge.ui.CircuitBrowserScreen;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
@@ -35,6 +35,7 @@ public class RougeClient implements ClientModInitializer {
         }
 
         RougeCommands.register();
+        BtwCommands.register();
         ChatInterceptor.register();
         CircuitBrowserScreen.register();
         ProactiveTutor.register();

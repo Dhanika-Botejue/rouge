@@ -41,12 +41,12 @@ public final class GhostRenderer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger("rouge");
 
-    /** Alpha applied to every ghost block (0–255). Low enough to clearly read as "not placed yet". */
-    private static final int GHOST_ALPHA = 110;
+    /** Alpha applied to every ghost block (0–255). Higher = easier to spot in-world. */
+    private static final int GHOST_ALPHA = 170;
 
     // Outline colours (r, g, b, a).
-    private static final float[] NEW_COLOR     = {0.30f, 1.00f, 0.45f, 0.95f}; // bright green — place these now
-    private static final float[] OLD_COLOR     = {0.55f, 0.70f, 1.00f, 0.35f}; // faint blue — already placed
+    private static final float[] NEW_COLOR     = {0.15f, 1.00f, 0.30f, 1.00f}; // bright green — place these now
+    private static final float[] OLD_COLOR     = {0.35f, 0.75f, 1.00f, 0.65f}; // blue — prior step blocks
     private static final float[] PREVIEW_COLOR = {1.00f, 0.80f, 0.10f, 0.70f}; // gold — interactive planning preview
 
     private static volatile List<Ghost> ghosts = List.of();
@@ -116,6 +116,10 @@ public final class GhostRenderer {
         previewGhosts = List.of();
     }
 
+    public static boolean isPreviewActive() { return previewActive; }
+
+    public static boolean isStepActive() { return active; }
+
     /** Registered on {@code WorldRenderEvents.AFTER_TRANSLUCENT}. */
     public static void render(WorldRenderContext context) {
         if (!active && !previewActive) return;
@@ -129,13 +133,14 @@ public final class GhostRenderer {
             MultiBufferSource.BufferSource buffers = mc.renderBuffers().bufferSource();
             BlockRenderDispatcher dispatcher = mc.getBlockRenderer();
 
-            // Step hologram (blue/green).
+            // Step hologram (translucent blocks + bright outlines).
             List<Ghost> snapshot = ghosts;
             if (active && !snapshot.isEmpty()) {
+                MultiBufferSource ghostBuffers = new GhostBufferSource(buffers, GHOST_ALPHA);
                 for (Ghost g : snapshot) {
                     pose.pushPose();
                     pose.translate(g.pos.getX() - cam.x, g.pos.getY() - cam.y, g.pos.getZ() - cam.z);
-                    dispatcher.renderSingleBlock(g.state, pose, buffers,
+                    dispatcher.renderSingleBlock(g.state, pose, ghostBuffers,
                             LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY);
                     pose.popPose();
                 }
@@ -145,6 +150,11 @@ public final class GhostRenderer {
                     double x = g.pos.getX() - cam.x, y = g.pos.getY() - cam.y, z = g.pos.getZ() - cam.z;
                     LevelRenderer.renderLineBox(pose, lines, x, y, z, x + 1, y + 1, z + 1,
                             c[0], c[1], c[2], c[3]);
+                    // Inner highlight so new blocks pop even from a distance.
+                    if (g.isNew) {
+                        LevelRenderer.renderLineBox(pose, lines, x + 0.1, y + 0.1, z + 0.1,
+                                x + 0.9, y + 0.9, z + 0.9, c[0], c[1], c[2], 0.55f);
+                    }
                 }
             }
 
@@ -238,6 +248,14 @@ public final class GhostRenderer {
         @Override
         public void unsetDefaultColor() {
             delegate.unsetDefaultColor();
+        }
+    }
+
+    /** Routes block draws through {@link GhostAlpha} so ghosts read as translucent. */
+    private record GhostBufferSource(MultiBufferSource delegate, int alpha) implements MultiBufferSource {
+        @Override
+        public VertexConsumer getBuffer(RenderType renderType) {
+            return new GhostAlpha(delegate.getBuffer(renderType), alpha);
         }
     }
 }

@@ -47,6 +47,48 @@ public final class StepSession {
         return plan != null;
     }
 
+    public static String circuitName() {
+        return plan == null ? "" : plan.circuit();
+    }
+
+    public static int stepNumber() {
+        return plan == null ? 0 : stepIndex + 1;
+    }
+
+    public static int stepTotal() {
+        return plan == null ? 0 : plan.steps().size();
+    }
+
+    public static String currentStepTitle() {
+        if (plan == null) return "";
+        return plan.steps().get(stepIndex).title();
+    }
+
+    public static String currentStepExplanation() {
+        if (plan == null) return "";
+        return plan.steps().get(stepIndex).explanation();
+    }
+
+    /** Titles of steps the player has already cleared (empty on step 1). */
+    public static List<String> completedStepTitles() {
+        if (plan == null || stepIndex == 0) return List.of();
+        List<String> titles = new ArrayList<>(stepIndex);
+        for (int i = 0; i < stepIndex; i++) {
+            titles.add(plan.steps().get(i).title());
+        }
+        return titles;
+    }
+
+    /** Next step title, or empty on the last step. */
+    public static String nextStepTitle() {
+        if (plan == null || stepIndex + 1 >= plan.steps().size()) return "";
+        return plan.steps().get(stepIndex + 1).title();
+    }
+
+    public static BlockPos stepAnchor() {
+        return anchor == null ? BlockPos.ZERO : anchor;
+    }
+
     /** Begins a build: anchors it in front of the player and shows step 1. */
     public static void start(StepPlan p) {
         start(p, false);
@@ -179,6 +221,61 @@ public final class StepSession {
         StepPlan.Step step = plan.steps().get(stepIndex);
         return "ACTIVE BUILD: " + plan.circuit() + ", step " + (stepIndex + 1) + "/"
                 + plan.steps().size() + " (" + step.title() + "). The player is placing these blocks now.";
+    }
+
+    /** Blocks the player should place on this step (positionally new vs the prior step). */
+    public static List<BlockEntry> newBlocksThisStep() {
+        if (plan == null) return List.of();
+        return List.copyOf(blocksAddedThisStep());
+    }
+
+    /** Cumulative blocks for the active step (build-local coords). */
+    public static List<BlockEntry> cumulativeBlocksNow() {
+        if (plan == null) return List.of();
+        return List.copyOf(plan.steps().get(stepIndex).blocks());
+    }
+
+    /** Cumulative blocks from the step before the current one, or empty on step 1. */
+    public static List<BlockEntry> priorCumulativeBlocks() {
+        if (plan == null || stepIndex == 0) return List.of();
+        return List.copyOf(plan.steps().get(stepIndex - 1).blocks());
+    }
+
+    /** World-space footprint summary for coaching context. */
+    public static String worldFootprintLine() {
+        if (plan == null || anchor == null) return "";
+        return locationLine();
+    }
+
+    /** After a btw coaching answer — chat only; never touch the hologram. */
+    public static void resumeAfterCoaching() {
+        if (plan == null) return;
+        int total = plan.steps().size();
+        ChatDisplay.system("Back to building — step " + (stepIndex + 1) + "/" + total
+                + ". Place the glowing blocks, say \"next\" to skip, or ask another question.");
+    }
+
+    /** Re-renders the hologram without re-printing step instructions. */
+    public static void refreshHologramOnly() {
+        if (plan == null) return;
+        StepPlan.Step step = plan.steps().get(stepIndex);
+        List<BlockEntry> all = step.blocks();
+        BuildSpec stepSpec = toBuildSpec(all);
+        Level level = LessonManager.level();
+        LessonManager.setActive(stepSpec, anchor, level);
+        List<BuildSpec.BlockEntry> shownSpec = Difficulty.shown(stepSpec, level);
+        List<BlockEntry> shown = GhostRenderer.fromSpec(shownSpec);
+        Set<Long> addedKeys = new HashSet<>();
+        for (BlockEntry b : blocksAddedThisStep()) {
+            addedKeys.add(BlockPos.asLong(b.x(), b.y(), b.z()));
+        }
+        List<BlockEntry> added = new ArrayList<>();
+        for (BlockEntry b : shown) {
+            if (addedKeys.contains(BlockPos.asLong(b.x(), b.y(), b.z()))) {
+                added.add(b);
+            }
+        }
+        GhostRenderer.show(anchor, shown, added.isEmpty() ? shown : added);
     }
 
     private static void showStep() {

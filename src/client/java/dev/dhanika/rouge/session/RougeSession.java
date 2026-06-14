@@ -10,6 +10,7 @@ import dev.dhanika.rouge.build.CircuitPrimitive;
 import dev.dhanika.rouge.build.PlanningOutline;
 import dev.dhanika.rouge.build.StepPlan;
 import dev.dhanika.rouge.chat.ChatDisplay;
+import dev.dhanika.rouge.coach.BtwContext;
 import dev.dhanika.rouge.render.ThinkingHud;
 import dev.dhanika.rouge.prompt.SystemPrompts;
 import dev.dhanika.rouge.render.GhostRenderer;
@@ -92,6 +93,10 @@ public final class RougeSession {
     // bypassing the build-browser intercept for that one message.
     private static boolean primedInteractive = false;
     private static String lastQuery = "";
+    /** True for one dispatch — btw coaching with rich context (build, preview, or open). */
+    private static boolean coachingTurn = false;
+    /** Set when the last AI dispatch was an explicit btw/coaching turn. */
+    private static boolean lastDispatchWasCoaching = false;
 
     // Build-intent verbs: a chat message matching these (in CHAT mode) opens the build browser
     // so the player can pick parts, instead of going straight to the AI. Conceptual questions
@@ -117,16 +122,14 @@ public final class RougeSession {
 
     public static boolean isOpen() { return open; }
 
+    /** True while an AI request is in flight (coaching, planning, etc.). */
+    public static boolean isAwaitingReply() { return awaitingReply; }
+
     public static void toggle() {
         if (open) close();
         else openSession();
     }
 
-    /**
-     * Opens a session (if not already open) and primes it for interactive planning mode.
-     * The next message from the player will trigger a rougeplanning outline instead of an
-     * immediate build directive.
-     */
     public static void openInteractive() {
         if (!open) openSession();
         // Inject a one-shot system note into history so the AI knows to use planning mode
@@ -137,6 +140,30 @@ public final class RougeSession {
         // The next build request should plan with the AI, not open the part picker.
         primedInteractive = true;
         ChatDisplay.system("Interactive mode on. Describe the build you want — we'll plan it together before building.");
+    }
+
+    /**
+     * BTW coaching: contextual answer with premium context when a build/preview exists,
+     * or open redstone coaching when nothing is active yet.
+     */
+    public static void askBtw(String question) {
+        if (question == null || question.isBlank()) {
+            ChatDisplay.system("Usage: /btw <your question>  (or /rouge btw <question>)");
+            return;
+        }
+        if (!open) {
+            openSession();
+        }
+        ensureBuildingMode();
+        ChatDisplay.userSaid(question.trim());
+        sendToAi(question.trim(), true);
+    }
+
+    /** Keeps session in build mode while a step session is live. */
+    public static void ensureBuildingMode() {
+        if (StepSession.isActive()) {
+            mode = Mode.BUILDING;
+        }
     }
 
     /**
@@ -293,6 +320,12 @@ public final class RougeSession {
         if (primedInteractive) {
             primedInteractive = false;
             sendToAi(text);
+            return;
+        }
+        // Mid-build questions while mode drifted to CHAT — route to btw coaching, not a new build.
+        if (StepSession.isActive() && !looksLikeBuildRequest(text)) {
+            ensureBuildingMode();
+            handleBuilding(text);
             return;
         }
         if (looksLikeBuildRequest(text)) {
@@ -458,13 +491,7 @@ public final class RougeSession {
                 mode = Mode.CHAT;
                 ChatDisplay.system("No worries — discarded that build. Ask me anything else, or browse parts to stitch again.");
             }
-            case OTHER -> {
-                // Treat as a follow-up: drop the stale proposal and let the AI re-plan.
-                pendingPlan = null;
-                GhostRenderer.clearPreview();
-                mode = Mode.CHAT;
-                sendToAi(text);
-            }
+            case OTHER -> sendToAi(text, true); // coaching — keep gold preview visible
         }
     }
 
@@ -484,7 +511,7 @@ public final class RougeSession {
                 StepSession.stop();
                 mode = Mode.CHAT;
             }
-            case OTHER -> sendToAi(text); // a real question mid-build — stay in BUILDING
+            case OTHER -> sendToAi(text, true); // mid-build coaching — stay in BUILDING
         }
     }
 
@@ -497,10 +524,15 @@ public final class RougeSession {
     }
 
     private static void sendToAi(String text) {
+        sendToAi(text, false);
+    }
+
+    private static void sendToAi(String text, boolean coaching) {
         if (awaitingReply) {
             ChatDisplay.system("Rouge is still thinking… one moment.");
             return;
         }
+        coachingTurn = coaching;
         lastQuery = text;
         history.add(ChatMessage.user(text));
         dispatchToAi();
@@ -525,7 +557,17 @@ public final class RougeSession {
             request.add(history.get(0)); // persona system prompt, always first
         }
         request.add(ChatMessage.system(CircuitLibrary.summary(lastQuery)));
-        if (mode == Mode.BUILDING) {
+        boolean coaching = coachingTurn;
+        lastDispatchWasCoaching = coaching;
+        coachingTurn = false;
+        if (coaching) {
+            ensureBuildingMode();
+            request.add(ChatMessage.system(SystemPrompts.btwCoach()));
+            String ctx = btwContextForDispatch();
+            if (!ctx.isBlank()) {
+                request.add(ChatMessage.system(ctx));
+            }
+        } else if (mode == Mode.BUILDING) {
             String ctx = StepSession.contextLine();
             if (!ctx.isBlank()) {
                 request.add(ChatMessage.system(
@@ -557,6 +599,7 @@ public final class RougeSession {
 
         if (err != null) {
             awaitingStitch = false;
+            lastDispatchWasCoaching = false;
             removeTrailingUserMessage();
             ChatDisplay.error(rootMessage(err));
             return;
@@ -570,9 +613,28 @@ public final class RougeSession {
         }
         reply = THINK_BLOCK.matcher(reply).replaceAll("").trim();
 
-                // Check for a planning outline fence first (takes priority over build fences).
+        Matcher m = FENCE.matcher(reply);
+        boolean hasPlan = m.find();
+
+        // Coaching / Q&A — chat only; never replace or clear a visible hologram.
+        if (hasVisibleHologram() || lastDispatchWasCoaching) {
+            lastDispatchWasCoaching = false;
+            ensureBuildingMode();
+            String text = hasPlan ? FENCE.matcher(reply).replaceAll("").trim() : reply;
+            text = PLANNING_FENCE.matcher(text).replaceAll("").trim();
+            history.add(ChatMessage.assistant(reply));
+            if (!text.isEmpty()) ChatDisplay.print(text);
+            if (StepSession.isActive()) {
+                StepSession.resumeAfterCoaching();
+            } else if (mode == Mode.CONFIRM_BUILD && pendingPlan != null) {
+                resumeAfterPreviewCoaching();
+            }
+            return;
+        }
+
+        // Check for a planning outline fence (not during an active step build).
         Matcher pm = PLANNING_FENCE.matcher(reply);
-        if (pm.find() && mode != Mode.BUILDING) {
+        if (pm.find()) {
             String outlineJson = pm.group(1).trim();
             String chatPart = PLANNING_FENCE.matcher(reply).replaceAll("").trim();
             try {
@@ -595,16 +657,8 @@ public final class RougeSession {
             return;
         }
 
-        Matcher m = FENCE.matcher(reply);
-        boolean hasPlan = m.find();
-
-        // Mid-build: ignore any build fence so we don't interrupt the active hologram.
-        if (mode == Mode.BUILDING) {
-            String text = hasPlan ? FENCE.matcher(reply).replaceAll("").trim() : reply;
-            history.add(ChatMessage.assistant(reply));
-            if (!text.isEmpty()) ChatDisplay.print(text);
-            return;
-        }
+        m = FENCE.matcher(reply);
+        hasPlan = m.find();
 
         if (hasPlan) {
             String planJson = m.group(1).trim();
@@ -687,12 +741,41 @@ public final class RougeSession {
         return steps.isEmpty() ? List.of() : steps.get(steps.size() - 1).blocks();
     }
 
+    /** Picks the richest btw context available for this session state. */
+    private static String btwContextForDispatch() {
+        if (StepSession.isActive()) {
+            return BtwContext.build();
+        }
+        if (pendingPlan != null && (mode == Mode.CONFIRM_BUILD || GhostRenderer.isPreviewActive())) {
+            return BtwContext.forPreview(pendingPlan);
+        }
+        return BtwContext.general();
+    }
+
     /** Shows the plan's full footprint as a gold preview hologram anchored in front of the player. */
     private static void showPreview(StepPlan plan) {
         List<BlockEntry> blocks = finalStepBlocks(plan);
         if (blocks.isEmpty()) return;
         BlockPos anchor = StepSession.computeAnchorFor(blocks);
         GhostRenderer.showPreview(anchor, blocks);
+    }
+
+    /** True when a step hologram or gold preview should stay untouched during AI Q&A. */
+    private static boolean hasVisibleHologram() {
+        return StepSession.isActive()
+                || GhostRenderer.isStepActive()
+                || (mode == Mode.CONFIRM_BUILD && pendingPlan != null)
+                || GhostRenderer.isPreviewActive();
+    }
+
+    /** After a preview coaching answer — chat only; restore preview if something cleared it. */
+    private static void resumeAfterPreviewCoaching() {
+        if (pendingPlan != null && !GhostRenderer.isPreviewActive()) {
+            showPreview(pendingPlan);
+        }
+        int steps = pendingPlan != null ? pendingPlan.steps().size() : 0;
+        ChatDisplay.system("Still previewing" + (steps > 0 ? " (" + steps + " step" + (steps == 1 ? "" : "s") + ")" : "")
+                + " — say \"yes\" to build step by step, \"no\" to discard, or ask another question.");
     }
 
     private static void removeTrailingUserMessage() {
