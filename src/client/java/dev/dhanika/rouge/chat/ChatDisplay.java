@@ -36,6 +36,11 @@ public final class ChatDisplay {
         emit(message, ChatFormatting.LIGHT_PURPLE, Tier.PRAISE);
     }
 
+    /** Echoes the player's own question (e.g. a /btw prompt), in aqua — chat only. */
+    public static void userSaid(String message) {
+        emit("[You] " + message, ChatFormatting.AQUA, Tier.OFF);
+    }
+
     /** A system/status note (e.g. session opened, thinking…), in gray — chat only. */
     public static void system(String message) {
         emit(message, ChatFormatting.GRAY, Tier.OFF);

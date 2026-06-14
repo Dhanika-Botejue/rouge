@@ -3,6 +3,688 @@
   "title": "TNT Cannon",
   "category": "tnt",
   "description": "Launches primed TNT across long distances using water to absorb the blast. Build a trough lined with a solid material, place a water source at the closed (back) end so the floor TNT won't destroy the cannon, then lay several 'charge' TNT along the trough floor and one 'projectile' TNT on top at the front. Firing order is everything: the charges detonate a tick or two before the projectile so their blast knocks the projectile forward instead of straight up. A repeater chain (each repeater set to a small delay) wired from a single button creates that staggered ignition. More charge TNT = more range. Point the open front of the trough at your target.",
-  "aliases": ["tnt cannon", "cannon", "tnt launcher"],
-  "footprint": "8x2x2"
+  "aliases": [
+    "tnt cannon",
+    "cannon",
+    "tnt launcher"
+  ],
+  "inputs": [
+    "button"
+  ],
+  "outputs": [],
+  "footprint": "3x4x7",
+  "steps": [
+    {
+      "title": "Lay the trough, water, and TNT",
+      "explanation": "Build the cobblestone trough: a long floor with a back wall at the closed end and a slab at the front lip. Place the water source at the closed (back) end \u2014 it absorbs the floor blast so the cannon survives every shot. Then lay the row of charge TNT along the trough floor and set the single projectile TNT at the very front; the charges go off first and shove the projectile out the open end.",
+      "blocks": [
+        {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 0,
+          "block": "minecraft:cobblestone_slab[type=bottom]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 1,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 1,
+          "block": "minecraft:tnt[unstable=false]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 1,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:tnt[unstable=false]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 3,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 3,
+          "block": "minecraft:tnt[unstable=false]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 3,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 4,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 4,
+          "block": "minecraft:tnt[unstable=false]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 4,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 5,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 5,
+          "block": "minecraft:water[level=0]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 5,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 6,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 6,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 6,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        }
+      ]
+    },
+    {
+      "title": "Wire the staggered ignition",
+      "explanation": "Run redstone dust from where the button will sit through the line of repeaters. Each repeater adds delay so the charges detonate a tick or two before the projectile \u2014 that stagger is what launches it forward instead of straight up. Keep the dust line unbroken from the button to the last charge.",
+      "blocks": [
+        {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 0,
+          "block": "minecraft:cobblestone_slab[type=bottom]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 1,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 1,
+          "block": "minecraft:tnt[unstable=false]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 1,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:tnt[unstable=false]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 3,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 3,
+          "block": "minecraft:tnt[unstable=false]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 3,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 4,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 4,
+          "block": "minecraft:tnt[unstable=false]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 4,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 5,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 5,
+          "block": "minecraft:water[level=0]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 5,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 6,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 6,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 6,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:repeater[delay=4,facing=south,locked=false,powered=false]"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:repeater[delay=4,facing=south,locked=false,powered=false]"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "z": 3,
+          "block": "minecraft:repeater[delay=4,facing=south,locked=false,powered=false]"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 3,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "z": 4,
+          "block": "minecraft:repeater[delay=4,facing=south,locked=false,powered=false]"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 4,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "z": 5,
+          "block": "minecraft:repeater[delay=4,facing=south,locked=false,powered=false]"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 5,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "z": 6,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 6,
+          "block": "minecraft:redstone_wire"
+        }
+      ]
+    },
+    {
+      "title": "Place the button and fire",
+      "explanation": "Add the stone button at the start of the redstone line. Point the open front of the trough at your target and press it: the charges blow, then the projectile rockets out. More charge TNT means more range.",
+      "blocks": [
+        {
+          "x": 0,
+          "y": 0,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 0,
+          "block": "minecraft:cobblestone_slab[type=bottom]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 1,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 1,
+          "block": "minecraft:tnt[unstable=false]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 1,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:tnt[unstable=false]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 3,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 3,
+          "block": "minecraft:tnt[unstable=false]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 3,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 4,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 4,
+          "block": "minecraft:tnt[unstable=false]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 4,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 5,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 5,
+          "block": "minecraft:water[level=0]"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 5,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "z": 6,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 6,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 2,
+          "y": 0,
+          "z": 6,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 2,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 2,
+          "y": 2,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 3,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 2,
+          "y": 3,
+          "z": 0,
+          "block": "minecraft:cobblestone"
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:repeater[delay=4,facing=south,locked=false,powered=false]"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 1,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:repeater[delay=4,facing=south,locked=false,powered=false]"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "z": 3,
+          "block": "minecraft:repeater[delay=4,facing=south,locked=false,powered=false]"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 3,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "z": 4,
+          "block": "minecraft:repeater[delay=4,facing=south,locked=false,powered=false]"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 4,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "z": 5,
+          "block": "minecraft:repeater[delay=4,facing=south,locked=false,powered=false]"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 5,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 0,
+          "y": 1,
+          "z": 6,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 2,
+          "y": 1,
+          "z": 6,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 6,
+          "block": "minecraft:stone_button[face=floor,facing=north,powered=false]"
+        }
+      ]
+    }
+  ]
 }

@@ -47,6 +47,16 @@ public final class RougeCommands {
                                     InventoryDistributor.giveForCurrentStep();
                                     return 1;
                                 }))
+                        .then(ClientCommandManager.literal("btw")
+                                .then(ClientCommandManager.argument("question", StringArgumentType.greedyString())
+                                        .executes(ctx -> {
+                                            RougeSession.askBtw(StringArgumentType.getString(ctx, "question"));
+                                            return 1;
+                                        }))
+                                .executes(ctx -> {
+                                    ChatDisplay.system("Usage: /rouge btw <question>  (shortcut: /btw <question>)");
+                                    return 1;
+                                }))
                         .then(ClientCommandManager.literal("voice")
                                 .then(ClientCommandManager.literal("on")
                                         .executes(ctx -> {

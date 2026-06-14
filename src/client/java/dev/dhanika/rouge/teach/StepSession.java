@@ -60,6 +60,17 @@ public final class StepSession {
         return plan == null ? List.of() : blocksAddedThisStep();
     }
 
+    /** Every block in the finished build (the final cumulative step), or empty if no build. */
+    public static List<BlockEntry> activeAllBlocks() {
+        if (plan == null || plan.steps().isEmpty()) return List.of();
+        return plan.steps().get(plan.steps().size() - 1).blocks();
+    }
+
+    /** Name of the circuit currently being built, or empty if none. */
+    public static String activeCircuit() {
+        return plan == null ? "" : plan.circuit();
+    }
+
     /** Begins a build: anchors it in front of the player and shows step 1. */
     public static void start(StepPlan p) {
         int total = p.steps().size();

@@ -7,6 +7,7 @@ import dev.dhanika.rouge.build.BuildDirective;
 import dev.dhanika.rouge.build.CircuitLibrary;
 import dev.dhanika.rouge.build.StepPlan;
 import dev.dhanika.rouge.chat.ChatDisplay;
+import dev.dhanika.rouge.coach.BtwContext;
 import dev.dhanika.rouge.prompt.SystemPrompts;
 import dev.dhanika.rouge.teach.StepSession;
 import dev.dhanika.rouge.voice.RougeSpeech;
@@ -63,6 +64,10 @@ public final class RougeSession {
     private static StepPlan pendingPlan;
     private static int repairAttempts = 0;
     private static String lastQuery = "";
+    // One-shot: the next dispatch is a /btw coaching turn (contextual Q&A, no build side effects).
+    private static boolean coachingTurn = false;
+    // Set while a coaching dispatch is in flight, so onReply treats the answer as pure Q&A.
+    private static boolean awaitingCoachingReply = false;
     private static final List<ChatMessage> history = new ArrayList<>();
 
     private RougeSession() {}
@@ -90,6 +95,8 @@ public final class RougeSession {
         pendingPlan = null;
         repairAttempts = 0;
         lastQuery = "";
+        coachingTurn = false;
+        awaitingCoachingReply = false;
         history.clear();
         history.add(ChatMessage.system(SystemPrompts.redstoneTutor()));
         client.prewarm(); // discover free models + warm the TLS connection before the first ask
@@ -105,6 +112,8 @@ public final class RougeSession {
         pendingPlan = null;
         repairAttempts = 0;
         lastQuery = "";
+        coachingTurn = false;
+        awaitingCoachingReply = false;
         history.clear();
         StepSession.reset();
         RougeSpeech.stop();
@@ -118,6 +127,8 @@ public final class RougeSession {
         pendingPlan = null;
         repairAttempts = 0;
         lastQuery = "";
+        coachingTurn = false;
+        awaitingCoachingReply = false;
         history.clear();
         RougeSpeech.stop();
     }
@@ -131,6 +142,34 @@ public final class RougeSession {
         if (open && mode == Mode.BUILDING) {
             mode = Mode.CHAT;
         }
+    }
+
+    /**
+     * BTW coaching ({@code /btw} or {@code /rouge btw}): answers a redstone question grounded in
+     * the current build, WITHOUT touching the hologram or proposing a build. The session keeps
+     * whatever mode it was in (BUILDING stays BUILDING), so commands and the step-by-step build
+     * continue normally right after the answer — exactly like asking a question mid-task.
+     */
+    public static void askBtw(String question) {
+        if (question == null || question.isBlank()) {
+            ChatDisplay.system("Usage: /btw <your question>  (or /rouge btw <question>)");
+            return;
+        }
+        if (!open) {
+            openSession();
+        }
+        // Keep the session in BUILDING mode while a hologram is live, so a follow-up "next"/"stop"
+        // still routes through the build handler after we answer.
+        if (StepSession.isActive()) {
+            mode = Mode.BUILDING;
+        }
+        if (awaitingReply) {
+            ChatDisplay.system("Rouge is still thinking… one moment.");
+            return;
+        }
+        String q = question.trim();
+        ChatDisplay.userSaid(q); // echo the question, like Claude Code shows your /btw prompt
+        sendToAi(q, true);
     }
 
     public static void handleUserMessage(String text) {
@@ -201,10 +240,15 @@ public final class RougeSession {
     }
 
     private static void sendToAi(String text) {
+        sendToAi(text, false);
+    }
+
+    private static void sendToAi(String text, boolean coaching) {
         if (awaitingReply) {
             ChatDisplay.system("Rouge is still thinking… one moment.");
             return;
         }
+        coachingTurn = coaching;
         lastQuery = text;
         history.add(ChatMessage.user(text));
         dispatchToAi();
@@ -219,20 +263,33 @@ public final class RougeSession {
         awaitingReply = true;
         ChatDisplay.system("Rouge is thinking…");
 
-        // Per-request system context: the persona prompt, the build library, and the current
-        // step if building. The library context is injected fresh each turn (not stored in
-        // history) to avoid bloating it. Only a recent window of the dialogue is resent so
-        // per-turn prefill stays fast as a long teaching session grows.
+        // A coaching (/btw) turn is a one-shot: capture and clear the flag so only this dispatch
+        // is treated as contextual Q&A.
+        boolean coaching = coachingTurn;
+        coachingTurn = false;
+        awaitingCoachingReply = coaching;
+
+        // Per-request system context. For a /btw turn we swap the persona for the BTW coach prompt
+        // and inject live build context; otherwise the normal persona + build library + step note.
+        // Either way only a recent window of the dialogue is resent so prefill stays fast.
         List<ChatMessage> request = new ArrayList<>();
-        if (!history.isEmpty()) {
-            request.add(history.get(0)); // persona system prompt, always first
-        }
-        request.add(ChatMessage.system(CircuitLibrary.summary(lastQuery)));
-        if (mode == Mode.BUILDING) {
-            String ctx = StepSession.contextLine();
+        if (coaching) {
+            request.add(ChatMessage.system(SystemPrompts.btwCoach()));
+            String ctx = BtwContext.forCurrentState();
             if (!ctx.isBlank()) {
-                request.add(ChatMessage.system(
-                        ctx + " Answer their question concisely; do NOT emit a new build unless they ask to change the design."));
+                request.add(ChatMessage.system(ctx));
+            }
+        } else {
+            if (!history.isEmpty()) {
+                request.add(history.get(0)); // persona system prompt, always first
+            }
+            request.add(ChatMessage.system(CircuitLibrary.summary(lastQuery)));
+            if (mode == Mode.BUILDING) {
+                String ctx = StepSession.contextLine();
+                if (!ctx.isBlank()) {
+                    request.add(ChatMessage.system(
+                            ctx + " Answer their question concisely; do NOT emit a new build unless they ask to change the design."));
+                }
             }
         }
         // Recent dialogue window (everything after the persona prompt at index 0).
@@ -252,8 +309,20 @@ public final class RougeSession {
         if (!open) return;
 
         if (err != null) {
+            awaitingCoachingReply = false;
             removeTrailingUserMessage();
             ChatDisplay.error(rootMessage(err));
+            return;
+        }
+
+        // A /btw coaching answer is pure Q&A: strip any build fence the model slipped in and just
+        // print the prose. Mode is left untouched, so the hologram and step commands carry on.
+        if (awaitingCoachingReply) {
+            awaitingCoachingReply = false;
+            String text = FENCE.matcher(reply).replaceAll("").trim();
+            if (text.isEmpty()) text = reply.trim();
+            history.add(ChatMessage.assistant(reply));
+            if (!text.isEmpty()) ChatDisplay.print(text);
             return;
         }
 

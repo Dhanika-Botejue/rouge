@@ -2,7 +2,1188 @@
   "id": "piston-door-3x3",
   "title": "3x3 Piston Door",
   "category": "door",
-  "description": "A 3x3 flush door using double piston extenders so the corner blocks can clear a 3-wide opening. Each of the four corners is driven by a double extender (a sticky piston pushing another sticky piston) so the corner block travels two spaces out of the doorway; the center edges use single sticky pistons. All extenders must fire in the correct order, so the control circuit chains observers or repeater delays: the outer (rear) pistons fire first, the inner (front) pistons a tick later. A lever or button on each side feeds a shared redstone line behind the wall. This is an advanced build — keep the two sides mirrored and give yourself at least 2 blocks of wall depth for the extender mechanism.",
-  "aliases": ["3x3 door", "big piston door", "jeb door", "vault door"],
-  "footprint": "5x5x4"
+  "description": "A 3x3 flush door using double piston extenders so the corner blocks can clear a 3-wide opening. Each of the four corners is driven by a double extender (a sticky piston pushing another sticky piston) so the corner block travels two spaces out of the doorway; the center edges use single sticky pistons. All extenders must fire in the correct order, so the control circuit chains observers or repeater delays: the outer (rear) pistons fire first, the inner (front) pistons a tick later. A lever or button on each side feeds a shared redstone line behind the wall. This is an advanced build \u2014 keep the two sides mirrored and give yourself at least 2 blocks of wall depth for the extender mechanism.",
+  "aliases": [
+    "3x3 door",
+    "big piston door",
+    "jeb door",
+    "vault door"
+  ],
+  "inputs": [
+    "lever"
+  ],
+  "outputs": [],
+  "footprint": "3x10x7",
+  "steps": [
+    {
+      "title": "Build the wall frame",
+      "explanation": "Lay the light gray concrete that frames the 3x3 opening and the wall behind it that hides the mechanism. Leave the 3x3 doorway and the channels the pistons travel through empty for now.",
+      "blocks": [
+        {
+          "x": 1,
+          "y": 0,
+          "z": 0,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 1,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 3,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 4,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 5,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 6,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 3,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 6,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 0,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 1,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 2,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 3,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 4,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 1,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 5,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 1,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 5,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 6,
+          "z": 1,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 6,
+          "z": 5,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 2,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 3,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 4,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 6,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "z": 5,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 9,
+          "z": 0,
+          "block": "minecraft:light_gray_concrete"
+        }
+      ]
+    },
+    {
+      "title": "Place the pistons, observers and droppers",
+      "explanation": "Set the sticky pistons that shove the door blocks \u2014 match every facing exactly: the north/south pistons drive the corner blocks clear of the opening, and the up/down pistons handle the center column. The observers provide the timing pulses and the droppers and extra piston are part of the corner extender. Keep the two sides mirrored.",
+      "blocks": [
+        {
+          "x": 1,
+          "y": 0,
+          "z": 0,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 1,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 3,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 4,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 5,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 6,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 3,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 6,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 0,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 1,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 2,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 3,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 4,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 1,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 5,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 1,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 5,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 6,
+          "z": 1,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 6,
+          "z": 5,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 2,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 3,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 4,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 6,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "z": 5,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 9,
+          "z": 0,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:observer[facing=north,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 4,
+          "block": "minecraft:dropper[facing=east,triggered=false]"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 5,
+          "block": "minecraft:observer[facing=north,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 1,
+          "block": "minecraft:piston[extended=false,facing=down]"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 2,
+          "block": "minecraft:sticky_piston[extended=false,facing=up]"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 3,
+          "block": "minecraft:sticky_piston[extended=false,facing=up]"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 4,
+          "block": "minecraft:observer[facing=south,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 5,
+          "block": "minecraft:observer[facing=down,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 5,
+          "block": "minecraft:sticky_piston[extended=false,facing=north]"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 6,
+          "block": "minecraft:observer[facing=down,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 0,
+          "block": "minecraft:observer[facing=up,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 6,
+          "block": "minecraft:sticky_piston[extended=false,facing=north]"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 0,
+          "block": "minecraft:sticky_piston[extended=false,facing=south]"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 6,
+          "block": "minecraft:sticky_piston[extended=false,facing=north]"
+        },
+        {
+          "x": 1,
+          "y": 6,
+          "z": 0,
+          "block": "minecraft:sticky_piston[extended=false,facing=south]"
+        },
+        {
+          "x": 1,
+          "y": 6,
+          "z": 6,
+          "block": "minecraft:sticky_piston[extended=false,facing=north]"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 0,
+          "block": "minecraft:dropper[facing=east,triggered=false]"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 1,
+          "block": "minecraft:observer[facing=north,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "z": 1,
+          "block": "minecraft:observer[facing=north,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "z": 2,
+          "block": "minecraft:observer[facing=north,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "z": 3,
+          "block": "minecraft:sticky_piston[extended=false,facing=down]"
+        },
+        {
+          "x": 1,
+          "y": 9,
+          "z": 3,
+          "block": "minecraft:sticky_piston[extended=false,facing=down]"
+        },
+        {
+          "x": 1,
+          "y": 9,
+          "z": 4,
+          "block": "minecraft:observer[facing=north,powered=false]"
+        }
+      ]
+    },
+    {
+      "title": "Wire the redstone",
+      "explanation": "Run dust and the two repeaters so one signal reaches every piston and observer in order. The repeater delays and observer pulses fire the rear pistons first and the front pistons a tick later, so the corner blocks fully clear the 3-wide gap.",
+      "blocks": [
+        {
+          "x": 1,
+          "y": 0,
+          "z": 0,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 1,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 3,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 4,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 5,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 6,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 3,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 6,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 0,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 1,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 2,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 3,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 4,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 1,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 5,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 1,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 5,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 6,
+          "z": 1,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 6,
+          "z": 5,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 2,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 3,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 4,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 6,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "z": 5,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 9,
+          "z": 0,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:observer[facing=north,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 4,
+          "block": "minecraft:dropper[facing=east,triggered=false]"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 5,
+          "block": "minecraft:observer[facing=north,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 1,
+          "block": "minecraft:piston[extended=false,facing=down]"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 2,
+          "block": "minecraft:sticky_piston[extended=false,facing=up]"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 3,
+          "block": "minecraft:sticky_piston[extended=false,facing=up]"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 4,
+          "block": "minecraft:observer[facing=south,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 5,
+          "block": "minecraft:observer[facing=down,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 5,
+          "block": "minecraft:sticky_piston[extended=false,facing=north]"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 6,
+          "block": "minecraft:observer[facing=down,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 0,
+          "block": "minecraft:observer[facing=up,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 6,
+          "block": "minecraft:sticky_piston[extended=false,facing=north]"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 0,
+          "block": "minecraft:sticky_piston[extended=false,facing=south]"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 6,
+          "block": "minecraft:sticky_piston[extended=false,facing=north]"
+        },
+        {
+          "x": 1,
+          "y": 6,
+          "z": 0,
+          "block": "minecraft:sticky_piston[extended=false,facing=south]"
+        },
+        {
+          "x": 1,
+          "y": 6,
+          "z": 6,
+          "block": "minecraft:sticky_piston[extended=false,facing=north]"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 0,
+          "block": "minecraft:dropper[facing=east,triggered=false]"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 1,
+          "block": "minecraft:observer[facing=north,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "z": 1,
+          "block": "minecraft:observer[facing=north,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "z": 2,
+          "block": "minecraft:observer[facing=north,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "z": 3,
+          "block": "minecraft:sticky_piston[extended=false,facing=down]"
+        },
+        {
+          "x": 1,
+          "y": 9,
+          "z": 3,
+          "block": "minecraft:sticky_piston[extended=false,facing=down]"
+        },
+        {
+          "x": 1,
+          "y": 9,
+          "z": 4,
+          "block": "minecraft:observer[facing=north,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 6,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 0,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "z": 0,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "z": 4,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "z": 6,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 1,
+          "y": 9,
+          "z": 1,
+          "block": "minecraft:repeater[delay=4,facing=north,locked=false,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 9,
+          "z": 2,
+          "block": "minecraft:repeater[delay=1,facing=north,locked=false,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 9,
+          "z": 5,
+          "block": "minecraft:redstone_wire"
+        }
+      ]
+    },
+    {
+      "title": "Add the levers and test",
+      "explanation": "Place a lever on each side wall feeding the shared redstone line. Flip one: the pistons extend in sequence and the 3x3 wall slides open; flip back to close. If a corner sticks, check that piston's facing and that its observer or repeater timing is intact.",
+      "blocks": [
+        {
+          "x": 1,
+          "y": 0,
+          "z": 0,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 1,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 2,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 3,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 4,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 5,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 0,
+          "z": 6,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 3,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 6,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 0,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 1,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 2,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 3,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 4,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 1,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 5,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 1,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 5,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 6,
+          "z": 1,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 6,
+          "z": 5,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 2,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 3,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 4,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 6,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "z": 5,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 9,
+          "z": 0,
+          "block": "minecraft:light_gray_concrete"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 2,
+          "block": "minecraft:observer[facing=north,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 4,
+          "block": "minecraft:dropper[facing=east,triggered=false]"
+        },
+        {
+          "x": 1,
+          "y": 1,
+          "z": 5,
+          "block": "minecraft:observer[facing=north,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 1,
+          "block": "minecraft:piston[extended=false,facing=down]"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 2,
+          "block": "minecraft:sticky_piston[extended=false,facing=up]"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 3,
+          "block": "minecraft:sticky_piston[extended=false,facing=up]"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 4,
+          "block": "minecraft:observer[facing=south,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 5,
+          "block": "minecraft:observer[facing=down,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 5,
+          "block": "minecraft:sticky_piston[extended=false,facing=north]"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 6,
+          "block": "minecraft:observer[facing=down,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 0,
+          "block": "minecraft:observer[facing=up,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 4,
+          "z": 6,
+          "block": "minecraft:sticky_piston[extended=false,facing=north]"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 0,
+          "block": "minecraft:sticky_piston[extended=false,facing=south]"
+        },
+        {
+          "x": 1,
+          "y": 5,
+          "z": 6,
+          "block": "minecraft:sticky_piston[extended=false,facing=north]"
+        },
+        {
+          "x": 1,
+          "y": 6,
+          "z": 0,
+          "block": "minecraft:sticky_piston[extended=false,facing=south]"
+        },
+        {
+          "x": 1,
+          "y": 6,
+          "z": 6,
+          "block": "minecraft:sticky_piston[extended=false,facing=north]"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 0,
+          "block": "minecraft:dropper[facing=east,triggered=false]"
+        },
+        {
+          "x": 1,
+          "y": 7,
+          "z": 1,
+          "block": "minecraft:observer[facing=north,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "z": 1,
+          "block": "minecraft:observer[facing=north,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "z": 2,
+          "block": "minecraft:observer[facing=north,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "z": 3,
+          "block": "minecraft:sticky_piston[extended=false,facing=down]"
+        },
+        {
+          "x": 1,
+          "y": 9,
+          "z": 3,
+          "block": "minecraft:sticky_piston[extended=false,facing=down]"
+        },
+        {
+          "x": 1,
+          "y": 9,
+          "z": 4,
+          "block": "minecraft:observer[facing=north,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 2,
+          "z": 6,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 1,
+          "y": 3,
+          "z": 0,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "z": 0,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "z": 4,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 1,
+          "y": 8,
+          "z": 6,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 1,
+          "y": 9,
+          "z": 1,
+          "block": "minecraft:repeater[delay=4,facing=north,locked=false,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 9,
+          "z": 2,
+          "block": "minecraft:repeater[delay=1,facing=north,locked=false,powered=false]"
+        },
+        {
+          "x": 1,
+          "y": 9,
+          "z": 5,
+          "block": "minecraft:redstone_wire"
+        },
+        {
+          "x": 0,
+          "y": 9,
+          "z": 0,
+          "block": "minecraft:lever[face=wall,facing=west,powered=false]"
+        },
+        {
+          "x": 2,
+          "y": 9,
+          "z": 0,
+          "block": "minecraft:lever[face=wall,facing=east,powered=false]"
+        }
+      ]
+    }
+  ]
 }

@@ -30,6 +30,7 @@ ahead or repositioning.
 | `/rouge move` | Re-place the hologram in front of where you're standing now. |
 | `/rouge stop` | Cancel the active build and clear the hologram. |
 | `/rouge materials` | Hand you the items needed for the current step's blocks (creative singleplayer). Silent if no build is active. |
+| `/rouge btw <question>` | Ask Rouge a question mid-build — it answers with full context of your current build and step, then you keep building. Shortcut: `/btw <question>`. |
 
 ## Voice (ElevenLabs)
 

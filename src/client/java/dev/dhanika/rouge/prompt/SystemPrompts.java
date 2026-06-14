@@ -21,12 +21,22 @@ public final class SystemPrompts {
             + "Give concise, practical, buildable redstone advice for modern Java Edition. "
             + "Plain text only.";
 
+    private static final String BTW_COACH_FALLBACK =
+            "You are Rouge in BTW coaching mode. The hologram stays visible while you answer in chat. "
+            + "Use intro, digestible technical body, and conclusion. Ground answers in BTW CONTEXT. "
+            + "Plain text only; never emit build fences or propose a new build.";
+
     private SystemPrompts() {
     }
 
     /** The redstone-tutor / chat persona. */
     public static String redstoneTutor() {
         return load("/rouge/system_prompt.txt", TUTOR_FALLBACK);
+    }
+
+    /** Persona for mid-build contextual coaching ({@code /btw}). */
+    public static String btwCoach() {
+        return load("/rouge/btw_coach.txt", BTW_COACH_FALLBACK);
     }
 
     private static String load(String path, String fallback) {
